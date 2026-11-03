@@ -1,0 +1,4 @@
+Tesseract.js 6.0.1 (Apache-2.0), naptha/tesseract.js.
+Tesseract.js-core: viz LICENSE-core.txt.
+Czech/English language data: @tesseract.js-data/ces and eng 1.0.0, MIT, naptha/tessdata.
+Fotografie se rozpoznávají v prohlížeči. Modely a WASM jsou součástí aplikace.
