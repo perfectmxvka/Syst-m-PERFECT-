@@ -11,6 +11,7 @@
     "import": "node --env-file-if-exists=.env migrate.mjs",
     "test": "node --test test/*.test.mjs",
     "test:integration": "node test/integration110.mjs",
+    "test:postgres": "node --test test/postgres.integration.mjs",
     "init:clean": "node --env-file-if-exists=.env seed-clean.mjs"
   },
   "dependencies": {
@@ -18,6 +19,7 @@
     "@tesseract.js-data/eng": "1.0.0",
     "cloudinary": "^2.7.0",
     "mongodb": "^6.21.0",
+    "pg": "8.16.3",
     "tesseract.js": "6.0.1",
     "web-push": "3.6.7"
   },
