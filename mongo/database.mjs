@@ -4,7 +4,8 @@ import {PostgresDatabase} from './postgres-db.mjs';
 export async function openDatabase(env=process.env){
  const url=env.SUPABASE_DATABASE_URL||env.DATABASE_URL;
  if(url){
-  const parsed=new URL(url);
+  let parsed;
+  try{parsed=new URL(url);}catch{throw Error('SUPABASE_DATABASE_URL musí obsahovat celou PostgreSQL URI ze Supabase Connect, nikoli samotné heslo.');}
   if(!['postgres:','postgresql:'].includes(parsed.protocol))throw Error('SUPABASE_DATABASE_URL musí být PostgreSQL connection string.');
   if(!parsed.hostname||!parsed.username||parsed.pathname.length<2)throw Error('PostgreSQL URI musí obsahovat hostitele, uživatele a databázi.');
   const local=['localhost','127.0.0.1','[::1]'].includes(parsed.hostname);
