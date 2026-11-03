@@ -1,0 +1,34 @@
+<script id="perfect-v50-design-29-activation">
+(function(){
+ 'use strict';
+ if(window.__perfectV50Design29)return;
+ window.__perfectV50Design29=true;
+ const views=new Set(['dashboard','orders','customers','vehicles','calendar','detailing','boxes49','vouchers','payments','services','stats','settings']);
+ function start(){
+   const nav=document.getElementById('navigation');
+   if(!nav)return;
+   let queued=false;
+   function refresh(){
+     queued=false;
+     const active=nav.querySelector('[data-page].active');
+     let key=active?active.getAttribute('data-page'):'';
+     if(nav.querySelector('#perfectBoxesNav36.active')||document.body.classList.contains('b49-theme')) key='boxes49';
+     if(!views.has(key)) key='';
+     if(key)document.body.setAttribute('data-v50-view',key);
+     else document.body.removeAttribute('data-v50-view');
+   }
+   function schedule(){if(queued)return;queued=true;requestAnimationFrame(refresh)}
+   const watcher=new MutationObserver(schedule);
+   watcher.observe(nav,{subtree:true,attributes:true,attributeFilter:['class','aria-selected','hidden']});
+   watcher.observe(document.body,{attributes:true,attributeFilter:['class']});
+   document.addEventListener('click',schedule,true);
+   refresh();
+   window.perfectV50Design29Status=function(){
+     const ids=Array.from({length:19},(_,i)=>String(i+10).padStart(2,'0'));
+     return {activeView:document.body.getAttribute('data-v50-view')||'',loadedStyles:ids.filter(n=>!!document.getElementById('perfect-v50-design-'+n)).length,expectedStyles:19};
+   };
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+ else start();
+})();
+</script>

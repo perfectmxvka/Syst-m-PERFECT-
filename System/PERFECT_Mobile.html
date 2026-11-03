@@ -1,0 +1,134 @@
+<!-- PERFECT MOBILE PROD: samostatny modul; bez zmen backendu/dat -->
+<style id="perfectMobileStyleV1">
+/* PERFECT MOBILE STAFF V1 – pouze adaptivni vzhled, data a prava zustavaji ve V49.1 */
+#pmStaffDock[hidden]{display:none!important}
+#pmStaffDock{display:none}
+@media(max-width:760px){
+  html{scroll-padding-bottom:95px}
+  body.pm-staff-active{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}
+  body.pm-staff-active .layout>main{padding-bottom:calc(105px + env(safe-area-inset-bottom,0px))!important}
+  body.pm-staff-active .b49 .main,body.pm-staff-active .v49 .main{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}
+  #pmStaffDock:not([hidden]){
+    position:fixed;display:flex;bottom:0;left:0;right:0;z-index:10990;
+    align-items:stretch;justify-content:space-around;gap:2px;
+    height:calc(69px + env(safe-area-inset-bottom,0px));
+    padding:7px 6px calc(6px + env(safe-area-inset-bottom,0px));
+    background:linear-gradient(180deg,#181b20f7,#090b0dfc);border-top:1px solid #383d46;
+    box-shadow:0 -12px 36px #0008;backdrop-filter:blur(14px);
+  }
+  #pmStaffDock .pm-item{min-width:0;flex:1;border:1px solid transparent;border-radius:12px;
+    background:transparent;color:#aeb4c0;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:4px;font-size:10px;font-weight:700;padding:6px 2px;line-height:1.1;
+    -webkit-tap-highlight-color:transparent;transition:background .15s ease,color .15s ease}
+  #pmStaffDock .pm-item svg{height:21px;width:21px;fill:none;stroke:currentColor;stroke-width:1.9;
+    stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  #pmStaffDock .pm-item[aria-current="page"]{background:#bd132324;color:#fff;border-color:#df263f80}
+  #pmStaffDock .pm-item[aria-current="page"] svg{color:#ff4255}
+  #pmStaffDock .pm-item:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+  #pmStaffDock .pm-item[hidden]{display:none!important}
+  body.detailing-theme #pmStaffDock .pm-item[aria-current="page"]{background:#a4803026;border-color:#c6a34f77}
+  body.detailing-theme #pmStaffDock .pm-item[aria-current="page"] svg{color:#d9bd6b}
+  body.pm-staff-active .layout>main>.top{min-width:0}
+  body.pm-staff-active main .top-actions{gap:8px}
+  body.pm-staff-active main .top-actions .btn{min-height:42px}
+  body.pm-staff-active #app{min-width:0;max-width:100%}
+  body.pm-staff-active input:not([type="checkbox"]):not([type="radio"]),
+  body.pm-staff-active select,body.pm-staff-active textarea{font-size:16px}
+  body.pm-staff-active #perfectResult36{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  body.pm-staff-active .b49 .baylayout{grid-template-columns:minmax(0,1fr)!important}
+  body.pm-staff-active .b49 .boxcol{min-height:0!important}
+  body.pm-staff-active .b49 .centercol{grid-row:1}
+}
+@media(prefers-reduced-motion:reduce){#pmStaffDock .pm-item{transition:none}}
+
+</style>
+<script id="perfectMobileScriptV1">
+/* PERFECT MOBILE STAFF V1 – naviguje EXISTUJICI obrazovky; nenahrazuje backend. */
+(function(){
+ 'use strict';
+ if(window.__perfectStaffMobileV1)return;
+ window.__perfectStaffMobileV1=true;
+ window.PERFECT_MOBILE_RELEASE=Object.freeze({base:'V49.1',mobile:'1.0.0',package:'PERFECT-MOBILE-PROD-20261019'});
+ const nav=document.getElementById('navigation');
+ const gate=document.getElementById('authGate');
+ const layout=document.querySelector('.layout');
+ if(!nav||!gate||!layout)return;
+ const ns='http://www.w3.org/2000/svg';
+ const iconPaths={
+  today:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+  orders:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  boxes:'<rect x="2" y="4" width="8" height="16" rx="1"/><rect x="14" y="4" width="8" height="16" rx="1"/><path d="M5 8h2M17 8h2"/>',
+  profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>'
+ };
+ const tabs=[
+  {id:'today',label:'Dnes',selector:'#navigation [data-page="dashboard"]'},
+  {id:'orders',label:'Zakázky',selector:'#navigation [data-page="orders"]'},
+  {id:'boxes',label:'Boxy',selector:'#perfectBoxesNav36'},
+  {id:'profile',label:'Profil',selector:'#perfectMyProfileButton'},
+  {id:'menu',label:'Více',selector:'#perfectMobileMenuToggle'}
+ ];
+ const dock=document.createElement('nav');dock.id='pmStaffDock';dock.setAttribute('aria-label','Mobilní navigace PERFECT');dock.hidden=true;
+ for(const tab of tabs){
+  const b=document.createElement('button');b.type='button';b.className='pm-item';b.dataset.pmTab=tab.id;
+  b.setAttribute('aria-label',tab.label);
+  b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+iconPaths[tab.id]+'</svg><span>'+tab.label+'</span>';
+  b.addEventListener('click',()=>{
+   const target=document.querySelector(tab.selector);
+   if(!target||target.hidden||target.disabled)return;
+   target.click();
+   if(tab.id!=='menu'){
+    const menu=document.getElementById('perfectMobileMenuToggle');
+    if(document.body.classList.contains('pd-menu-open')&&menu&&menu.getAttribute('aria-expanded')==='true')menu.click();
+   }
+   window.setTimeout(refresh,60);
+  });
+  dock.append(b);
+ }
+ document.body.append(dock);
+ function accessible(el){
+  if(!el||el.hidden||el.disabled||el.getAttribute('aria-hidden')==='true')return false;
+  if(el.id==='perfectBoxesNav36')return !el.hidden; // respektuje existujici kontrolu finance.read
+  return true;
+ }
+ function loggedIn(){
+  const hidden=gate.style.display==='none' || getComputedStyle(gate).display==='none';
+  const visible=layout.style.visibility!=='hidden';
+  // login pouziva sessionStorage; neuchovavame ani neodesilame token
+  let token=false;try{token=!!sessionStorage.getItem('perfectAuthToken')}catch(e){}
+  return hidden&&visible&&token;
+ }
+ function refresh(){
+  const mobile=window.matchMedia('(max-width:760px)').matches;
+  const show=mobile&&loggedIn();
+  if(dock.hidden===show)dock.hidden=!show;
+  document.body.classList.toggle('pm-staff-active',show);
+  if(!show)return;
+  const body=document.body;
+  let active='';
+  if(body.classList.contains('b49-theme')||nav.querySelector('#perfectBoxesNav36.active'))active='boxes';
+  else if(body.classList.contains('pd-menu-open'))active='menu';
+  else if(nav.querySelector('[data-page="orders"].active'))active='orders';
+  else if(nav.querySelector('[data-page="dashboard"].active'))active='today';
+  for(const tab of tabs){
+   const b=dock.querySelector('[data-pm-tab="'+tab.id+'"]');
+   const source=document.querySelector(tab.selector);
+   const can=accessible(source);
+   if(b.hidden===can)b.hidden=!can;
+   if(active===tab.id)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  }
+ }
+ let pending=false;
+ function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;refresh()})}
+ const obs=new MutationObserver(schedule);
+ obs.observe(gate,{attributes:true,attributeFilter:['style','class','hidden']});
+ obs.observe(layout,{attributes:true,attributeFilter:['style','class']});
+ obs.observe(nav,{subtree:true,attributes:true,attributeFilter:['class','hidden','style','aria-selected']});
+ obs.observe(document.body,{attributes:true,attributeFilter:['class']});
+ window.addEventListener('resize',schedule,{passive:true});
+ document.addEventListener('click',schedule,true);
+ document.addEventListener('visibilitychange',schedule);
+ refresh();
+})();
+
+</script>

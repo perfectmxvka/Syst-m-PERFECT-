@@ -1,0 +1,816 @@
+<!-- BEGIN PERFECT_V50_DESIGN_01_ZAKLAD -->
+<style id="perfect-v50-design-core">
+/* PERFECT V50 — společný vizuální systém, nezasahuje do backendu */
+:root {
+  --v50-red: #ed122e; --v50-red-light: #ff4059;
+  --v50-ink:#08090c; --v50-bg:#0a0c10; --v50-surface:#141820;
+  --v50-surface-raised:#1a1e26; --v50-stroke:#30353d;
+  --v50-text:#f6f6f8; --v50-secondary:#aab1bb;
+  --v50-shadow:0 15px 42px rgba(0,0,0,.25);
+  --v50-radius:17px;
+}
+html{color-scheme:dark}
+body:not(.detailing-theme){background:radial-gradient(ellipse 75% 45% at 100% 3%,rgba(118,16,29,.14),transparent 80%),#080a0d;color:#f6f6f8}
+.layout>main{min-width:0;position:relative}
+.layout>main::before{content:"";position:fixed;pointer-events:none;top:0;right:0;width:40vw;height:250px;background:radial-gradient(ellipse at top right,#b30b2011,transparent 68%);z-index:0}
+.layout>main>*{position:relative}
+#perfectSidebar{background:linear-gradient(180deg,#111319,#090a0c 85%)!important;border-right:1px solid #35333a!important;box-shadow:5px 0 26px #0004}
+#perfectSidebar .nav-caption{color:#aab0bc;letter-spacing:1.7px;font-size:10px;font-weight:800;margin-top:15px}
+#navigation button{min-height:42px;border-radius:10px;transition:background .15s ease,border-color .15s ease,color .15s ease}
+#navigation button.active,#navigation button[aria-current="page"]{background:linear-gradient(115deg,rgba(200,14,39,.28),rgba(113,15,31,.16))!important;color:#fff!important;border-left:3px solid #f02d45!important}
+#navigation button:hover:not(.active){background:#25212a;color:#fff}
+#navigation button .ico{color:#ff5262!important}
+.layout>main>.top{display:flex;align-items:center;flex-wrap:wrap;gap:14px;min-height:90px;padding:9px 0 17px;border-bottom:1px solid #2a2c34;margin-bottom:22px}
+.layout>main>.top #pageTitle{font-size:clamp(22px,2.4vw,31px);line-height:1.18;letter-spacing:-.6px}
+.layout>main>.top .eyebrow{letter-spacing:2.2px;font-weight:850;color:#ff5a66}
+.layout>main>.top .top-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-left:auto}
+.layout>main>.top .connection-chip{border:1px solid #39434a!important;border-radius:100px;background:#17201e}
+#app{max-width:1600px;margin-inline:auto;min-width:0}
+#app .section,#app .card,#app .hero,#app .stat-card,#app .panel,#app .metric{
+  box-shadow:var(--v50-shadow);transition:border-color .14s ease,box-shadow .14s ease;
+}
+#app .section,#app .card{border-radius:var(--v50-radius);border-color:var(--v50-stroke);background:linear-gradient(165deg,#181b21,#111418)}
+#app .section:hover,#app .card:hover{border-color:#4b3840}
+#app .hero{border:1px solid #5a2f39;border-radius:20px;background:linear-gradient(135deg,#291219,#111418 62%,#17191d)}
+#app h2,#app h3,#app .section h3{letter-spacing:-.25px}
+#app .eyebrow,#app .kicker,#app .pd-kicker{color:#f0596a}
+#app .muted,#app .subtle{color:#aab0b9}
+#app .btn:not(.secondary):not(.outline),#newOrder{background:linear-gradient(120deg,#df102d,#ac0e25)!important;border:1px solid #fd415a!important;color:#fff!important;border-radius:10px;font-weight:800;box-shadow:0 5px 17px #e4112d23}
+#app .btn:hover,#newOrder:hover{filter:brightness(1.09)}
+#app .btn.secondary,#app .btn.outline{background:#20232b;border:1px solid #484c56;color:#f1f3f7;border-radius:10px}
+#app .btn:focus-visible,#navigation button:focus-visible{outline:2px solid #ff7589;outline-offset:2px}
+#app .table-wrap{overflow-x:auto;border:1px solid #34373f;border-radius:13px;background:#12161b}
+#app table{width:100%;border-collapse:separate;border-spacing:0}
+#app table th{background:#22252d;color:#c2c8d0;text-transform:uppercase;font-size:10px;letter-spacing:.8px;font-weight:850}
+#app table th,#app table td{padding:12px 13px;border-bottom:1px solid #292e35}
+#app table tbody tr:hover{background:#26202a}
+#app input:not([type="checkbox"]):not([type="radio"]),#app select,#app textarea{background:#1a1e24;border:1px solid #434852;border-radius:10px;color:#f3f3f5;min-height:39px}
+#app input:focus,#app textarea:focus,#app select:focus{outline:1px solid #ea4053;border-color:#ee3d54}
+#app .overlay .modal,.overlay .modal{background:linear-gradient(150deg,#161920,#0c0f12);border:1px solid #51424a;box-shadow:0 35px 95px #000b;border-radius:20px}
+#app .badge,#app .pill{border-radius:8px}
+/* Schválené formuláře a přihlašovací brána: jejich vnitřní rozložení nepřepisujeme. */
+#authGate .auth-brand{display:flex;align-items:center;justify-content:center;min-height:82px}
+#authGate .auth-brand img{object-fit:contain;max-width:min(100%,390px);max-height:95px}
+#perfectSidebar .brand-lockup{padding:10px 4px 6px!important;gap:8px;align-items:center}
+#perfectSidebar .brand-lockup .brand-mark{display:none!important}
+#perfectSidebar .brand-lockup .p50-brand-mini{max-height:76px!important;max-width:100%!important;object-fit:contain!important;filter:drop-shadow(0 3px 15px #d7193133)}
+#perfectSidebar .brand-lockup .logo small{color:#b6b9c0;letter-spacing:1.3px;font-size:8px}
+.v50-header-brand{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:83px;height:48px;min-width:0;margin-right:2px}
+.v50-header-brand img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(212,16,39,.14))}
+.v50-dialog-brand{width:98px;max-width:30%;margin:0 30px 0 auto;flex-shrink:0;object-fit:contain;max-height:52px}
+.v50-mobile-logo{display:none}
+@media(prefers-reduced-motion:reduce){#app .section,#app .card,#navigation button{transition:none}}
+</style>
+<!-- END PERFECT_V50_DESIGN_01_ZAKLAD -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_02_OBRAZOVKY -->
+<style id="perfect-v50-design-screens">
+/* 26 stávajících pohledů: jednotné karty, tabulky a zvýraznění. Funkční renderery zůstávají původní. */
+#app .p50-leaders{gap:18px;margin-bottom:20px}
+#app .p50-leaders>.section{border:1px solid #49313b;background:linear-gradient(160deg,#1c1b23,#11151b)}
+#app .p50-leaders .p50-rank-row{padding:14px 9px;border-radius:11px;gap:10px;border-bottom:1px solid #34353c}
+#app .p50-leaders .p50-rank-row:hover{background:#74212b26}
+#app .p50-place{font-size:15px;color:#f3b6be}
+#app .p50-crown{filter:drop-shadow(0 3px 5px #000)}
+#app .p50-avatar{background:linear-gradient(135deg,#7c162b,#232127);border:1px solid #ab4555;box-shadow:0 0 0 3px #de1b3220}
+#app .pv8-dashboard,#app .p50-leaders{min-width:0}
+#app .pv6-order{border:1px solid #39363b!important;border-radius:13px!important;transition:transform .15s,border-color .15s}
+#app .pv6-order:hover{border-color:#a83a4a!important;transform:translateY(-1px)}
+#app .vehicle-brand-logo{object-fit:contain}
+#app .vehicle-brand-cell{display:inline-flex;align-items:center;gap:10px}
+#app .vehicle-logo-fallback{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:#2b2730;width:35px;height:35px}
+#app .p50-order-customer{min-height:40px}
+#app button[data-open-order]{background:#d51531!important;border:1px solid #ed3b50!important;color:white!important;font-weight:850!important;padding:8px 13px!important;border-radius:9px!important}
+#app .calendar-grid{gap:8px}
+#app .calendar-grid .day{border-radius:12px;overflow:hidden;border:1px solid #383b44;background:#171a20;min-height:90px}
+#app .calendar-grid .day .dayhead{font-weight:900}
+#app .perfect-calendar-v50 .perfect-calendar-weekend-v50,.perfect-calendar-v50 .day.perfect-calendar-weekend-v50{border:2px solid #d0384c!important;background:linear-gradient(160deg,#40212a,#191319)!important}
+#app .perfect-calendar-v50 .perfect-calendar-today-v50{outline-offset:-2px}
+#app .pv8-navigation .pd-section-head{border-bottom:1px solid #383a40;padding-bottom:13px;margin-bottom:14px}
+/* Statistické moduly - sjednocení barev bez zásahu do výpočtů */
+#perfectReports39{--r39-red:#f43855!important;--r39-line:#3c3e47!important}
+#perfectReports39 .r39-tabs{border:1px solid #404550;background:#141821}
+#perfectReports39 .r39-tabs button[aria-selected="true"]{background:#bd1935!important;color:white!important}
+.g45{--g-bg:#0a0e13;--g-panel:#171b20;--g-input:#22262d;--g-border:#3a404a;--g-red:#ee2f49}
+.g45 .g45-card,.g45 .g45-panel{border-radius:14px}
+/* Boxy: nezakrývat přiřazení, nic ze směn neschovávat */
+.b49 .boxcol,.b49 .centercol{border-color:#41464e!important}
+.b49 .baylayout{gap:15px}
+.b49 .b49-order,.b49 .b49-job{border-radius:11px}
+/* Detailing je výjimka - samostatná zlatá identita */
+body.detailing-theme{--v50-red:#c3a159;background:#0b0a07!important}
+body.detailing-theme #app .section,body.detailing-theme #app .card{background:linear-gradient(160deg,#201c13,#11110e);border-color:#554b2d}
+body.detailing-theme .layout>main>.top{border-bottom-color:#504424}
+body.detailing-theme .v50-header-brand img{filter:drop-shadow(0 0 8px #c6a34f25)}
+/* Poukazy: původní náhledy zůstávají, karty nominálních hodnot zvýraznit */
+body.v49-theme #app .section{border-color:#524639}
+#app [data-voucher-value],#app [data-voucher-amount],#app .voucher-value-card{
+  border-radius:13px;box-shadow:0 7px 24px #0005;transition:transform .16s,border-color .16s;
+}
+#app [data-voucher-value]:hover,#app [data-voucher-amount]:hover,#app .voucher-value-card:hover{transform:translateY(-2px);border-color:#efca7e}
+#app .voucher-card img{object-fit:contain}
+/* Nastavení a správa - respektovat práva původních modulů */
+#app .settings-tabs,#app .tabs,#app .tabbar{gap:7px;flex-wrap:wrap}
+#app .settings-tabs button,#app .tabs button{border-radius:9px}
+#app .settings-tabs button.active,#app .tabs button.active{background:#ba172e;color:#fff}
+/* Stále přístupné dialogy a formuláře; žádná funkční tlačítka se neskrývají */
+.overlay{backdrop-filter:blur(7px)}
+.modal .modal-head{border-bottom:1px solid #373a42;padding-bottom:11px}
+@media(max-width:850px){#app .p50-leaders{grid-template-columns:1fr}#app .cards{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
+</style>
+<!-- END PERFECT_V50_DESIGN_02_OBRAZOVKY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_03_MOBIL -->
+<style id="perfect-v50-design-mobile">
+/* Responsive redesign PC / tablet / telefon */
+@media(max-width:1100px){
+ .layout>main>.top{align-items:flex-start}
+ .layout>main>.top .top-actions{flex:1;justify-content:flex-end}
+ #app .p50-leaders{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+ html,body{max-width:100%;overflow-x:hidden}
+ #perfectSidebar{width:min(320px,88vw)!important}
+ .layout>main{padding-inline:12px!important;padding-top:70px!important}
+ .layout>main>.top{padding:8px 0 15px;gap:10px;margin-bottom:16px}
+ .layout>main>.top #pageTitle{font-size:25px;line-height:1.15}
+ .layout>main>.top .top-actions{justify-content:flex-start;margin-left:0;width:100%}
+ .layout>main>.top .connection-chip{font-size:10px}
+ .v50-header-brand{width:80px;height:38px;margin-left:auto;order:2}
+ #app .section,#app .card{border-radius:12px;padding:14px}
+ #app .table-wrap{max-width:100%}
+ #app table{min-width:620px}
+ #app .p50-rank-row{padding:13px 7px;gap:8px}
+ .modal{max-width:calc(100vw - 18px)!important;margin-inline:auto}
+ .v50-dialog-brand{max-width:27%;width:72px;margin-left:auto}
+ #pmStaffDock{border-top:1px solid #5c2532!important;background:linear-gradient(180deg,#191b21f7,#0a0b0dfc)!important}
+ #pmStaffDock .pm-item[aria-current="page"]{background:#b5152d33!important;border-color:#e8475f!important}
+ .v50-mobile-logo{display:flex;align-items:center;justify-content:center;position:fixed;top:12px;right:12px;z-index:10001;width:81px;height:39px;pointer-events:none}
+ .v50-mobile-logo img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+ body:not(.pm-staff-active) .v50-mobile-logo{display:none}
+}
+@media(max-width:400px){
+ #app .section,#app .card{padding:11px}
+ .layout>main>.top #pageTitle{font-size:23px}
+ #app .p50-rank-name{font-size:12px}
+ #app .p50-avatar{width:34px;height:34px}
+ #pmStaffDock .pm-item{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){#app .pv6-order,#app [data-voucher-value]{transition:none}}
+</style>
+<!-- END PERFECT_V50_DESIGN_03_MOBIL -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_04_LOGO -->
+<script id="perfect-v50-official-brand-script">
+(function(){
+ 'use strict';
+ if(window.__perfectV50BrandApplied)return;
+ window.__perfectV50BrandApplied=true;
+ const LOGO="https://res.cloudinary.com/ecxcwvyr/image/upload/v1792400548/Leskl%C3%A9_logo_Automy%C4%8Dka_Perfect.png";
+ const q=(s,r=document)=>r.querySelector(s);
+ function img(cls){const im=document.createElement('img');im.src=LOGO;im.alt='Automyčka PERFECT';im.className=cls||'p50-official-logo';im.loading='eager';im.decoding='async';return im;}
+ function staticLogos(){
+  for(const im of document.querySelectorAll('#authGate .auth-brand img,#perfectSidebar .brand-lockup img.p50-official-logo')){
+   if(im.getAttribute('src')!==LOGO)im.setAttribute('src',LOGO);
+   im.removeAttribute('srcset');im.alt='Oficiální logo Automyčka PERFECT';
+  }
+  const old=q('#perfectSidebar .brand-mark');if(old)old.hidden=true;
+  const top=q('.layout>main>.top');
+  if(top&&!q('.v50-header-brand',top)){
+   const wrap=document.createElement('span');wrap.className='v50-header-brand';wrap.setAttribute('aria-label','Automyčka PERFECT');wrap.append(img());top.append(wrap);
+  }
+  if(!q('.v50-mobile-logo')){
+   const dock=document.createElement('div');dock.className='v50-mobile-logo';dock.setAttribute('aria-hidden','true');dock.append(img());document.body.append(dock);
+  }
+ }
+ function overlayLogos(){
+  const dialogs=document.querySelectorAll('.overlay .modal .modal-head, .g45-dialog .modal-head, .pd-modal>.modal-head');
+  for(const head of dialogs){
+   if(!q('.v50-dialog-brand',head))head.append(img('v50-dialog-brand'));
+  }
+  for(const hdr of document.querySelectorAll('.b49 header.top .brand')){
+   const im=q('img',hdr);if(im){if(im.getAttribute('src')!==LOGO)im.src=LOGO;}else if(!q('.p50-official-logo',hdr)){hdr.textContent='';hdr.append(img());}
+  }
+ }
+ let scheduled=false;
+ function refresh(){if(scheduled)return;scheduled=true;requestAnimationFrame(function(){scheduled=false;staticLogos();overlayLogos()});}
+ // Nevkládá loga do zákaznických nebo vozidlových dat; logo automobilky zůstává samostatné.
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
+ document.addEventListener('click',refresh,true);
+ const app=q('#app');if(app){new MutationObserver(refresh).observe(app,{childList:true,subtree:true});}
+})();
+</script>
+<!-- END PERFECT_V50_DESIGN_04_LOGO -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_05_DASHBOARD -->
+<style id="perfect-v50-design-05-dashboard">
+/* STAGE 02 / DASHBOARD — nezasahuje do žebříčku, pracuje s existujícími daty */
+#app.v50-stage-dashboard{--v50-list-gold:#f1c56d;--v50-list-silver:#d0d5dd;--v50-list-bronze:#d79b75}
+#app.v50-stage-dashboard>.p50-leaders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:stretch;margin:16px 0 24px}
+#app.v50-stage-dashboard>.p50-leaders>.section{position:relative;overflow:visible;min-width:0;padding:24px 18px 16px;background:linear-gradient(145deg,#1b1e24,#101217 87%);border:1px solid #383b45;border-radius:20px;box-shadow:0 18px 42px #0006}
+#app.v50-stage-dashboard>.p50-leaders>.section:before{content:"";position:absolute;top:0;left:18px;right:18px;height:3px;background:linear-gradient(90deg,#e8364d,#f08b6b 54%,transparent);border-radius:0 0 6px 6px}
+#app.v50-stage-dashboard>.p50-leaders>.section:nth-child(2):before{background:linear-gradient(90deg,#ecc46f,#c08644 54%,transparent)}
+#app.v50-stage-dashboard>.p50-leaders>.section>h3{margin:0 0 19px;padding:0 0 15px;border-bottom:1px solid #343842;font-size:17px;line-height:1.35;font-weight:900;letter-spacing:.05px;color:#fff}
+#app.v50-stage-dashboard .p50-rank-row{width:100%;display:grid;grid-template-columns:29px 54px minmax(0,1fr) auto;align-items:center;gap:11px;padding:13px 11px;margin:2px 0 6px;border:1px solid transparent;border-radius:12px;background:#1d2028;color:#f6f6f8;text-align:left;cursor:pointer;transition:background .15s ease,transform .15s ease,border-color .15s ease}
+#app.v50-stage-dashboard .p50-rank-row:hover{background:#30212b;transform:translateX(3px);border-color:#80424e}
+#app.v50-stage-dashboard .p50-rank-row:focus-visible{outline:2px solid #ff7285;outline-offset:2px}
+#app.v50-stage-dashboard .p50-rank-row:first-of-type{border-color:#8c6c365e;background:linear-gradient(95deg,#40301e,#242329 80%)}
+#app.v50-stage-dashboard .p50-rank-row:nth-of-type(2){border-color:#78808b50;background:linear-gradient(95deg,#303640,#22252a 80%)}
+#app.v50-stage-dashboard .p50-rank-row:nth-of-type(3){border-color:#85513655;background:linear-gradient(95deg,#342720,#222127 80%)}
+#app.v50-stage-dashboard .p50-place{display:inline-flex;align-items:center;justify-content:center;min-width:24px;font-size:17px;font-weight:950;color:#8f99a6;font-variant-numeric:tabular-nums}
+#app.v50-stage-dashboard .p50-rank-row:first-of-type .p50-place{color:var(--v50-list-gold)}
+#app.v50-stage-dashboard .p50-rank-row:nth-of-type(2) .p50-place{color:var(--v50-list-silver)}
+#app.v50-stage-dashboard .p50-rank-row:nth-of-type(3) .p50-place{color:var(--v50-list-bronze)}
+#app.v50-stage-dashboard .p50-avatar-wrap{width:52px;min-width:52px;display:inline-flex;justify-content:center;align-items:center;position:relative;padding-top:9px}
+#app.v50-stage-dashboard .p50-avatar{width:43px;height:43px;border-radius:50%;border:2px solid #70414c;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
+#app.v50-stage-dashboard .p50-crown{z-index:3}
+#app.v50-stage-dashboard .p50-rank-name{font-size:14px;font-weight:800;min-width:0;overflow-wrap:anywhere;line-height:1.3;color:#f6f7fa}
+#app.v50-stage-dashboard .p50-rank-row>strong{color:#fff;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:900}
+@media(max-width:1000px){#app.v50-stage-dashboard>.p50-leaders{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:540px){
+ #app.v50-stage-dashboard>.p50-leaders{gap:13px;margin:8px 0 16px}
+ #app.v50-stage-dashboard>.p50-leaders>.section{padding:18px 10px 11px;border-radius:14px}
+ #app.v50-stage-dashboard>.p50-leaders>.section>h3{font-size:15px;margin-bottom:12px}
+ #app.v50-stage-dashboard .p50-rank-row{grid-template-columns:22px 44px minmax(0,1fr) auto;gap:6px;padding:9px 7px}
+ #app.v50-stage-dashboard .p50-avatar-wrap{width:42px;min-width:42px}
+ #app.v50-stage-dashboard .p50-avatar{width:35px;height:35px}
+ #app.v50-stage-dashboard .p50-rank-name{font-size:12px}
+ #app.v50-stage-dashboard .p50-rank-row>strong{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){#app.v50-stage-dashboard .p50-rank-row{transition:none}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_05_DASHBOARD -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_06_ZAKAZKY -->
+<style id="perfect-v50-design-06-orders">
+/* STAGE 02 / ZAKÁZKY — platby, řazení a otevírání zachovává původní JS */
+#app.v50-stage-orders>.section{background:linear-gradient(153deg,#1b1d25,#101216 66%);border:1px solid #3b3e47;border-radius:19px;padding:22px;box-shadow:0 19px 44px #0006}
+#app.v50-stage-orders>.section>.toolbar:first-child{display:flex;justify-content:space-between;gap:15px;align-items:center;border-bottom:1px solid #383c45;padding-bottom:19px;margin-bottom:19px}
+#app.v50-stage-orders h3{font-size:clamp(19px,2vw,23px);font-weight:900;color:#f7f7fa;letter-spacing:-.5px;margin:0}
+#app.v50-stage-orders .toolbar input,#app.v50-stage-orders .toolbar select{min-height:43px;background:#1b1e25;color:#fff;border:1px solid #444953;border-radius:10px}
+#app.v50-stage-orders .toolbar input:focus-visible,#app.v50-stage-orders .toolbar select:focus-visible{outline:2px solid #e2455c;outline-offset:1px}
+#app.v50-stage-orders #orderCount{font-size:12px;letter-spacing:.3px;color:#a6adb9;margin:14px 0!important}
+#app.v50-stage-orders #tableArea{min-width:0}
+#app.v50-stage-orders #tableArea .table-wrap{border:1px solid #353943;border-radius:14px;overflow:auto;background:#13161b}
+#app.v50-stage-orders #tableArea table{border-collapse:separate;border-spacing:0;width:100%;min-width:920px}
+#app.v50-stage-orders #tableArea th{position:sticky;top:0;z-index:2;background:#20242c;color:#bdc4cf;font-size:10px;text-transform:uppercase;letter-spacing:.8px;padding:14px 11px;white-space:nowrap}
+#app.v50-stage-orders #tableArea td{padding:13px 11px;vertical-align:middle;border-bottom:1px solid #292f38;color:#e7e9ee;font-size:12px}
+#app.v50-stage-orders #tableArea tr:hover td{background:#231e25}
+#app.v50-stage-orders #tableArea .p50-order-customer{display:inline-flex;gap:8px;align-items:center}
+#app.v50-stage-orders #tableArea .vehicle-brand-cell{display:inline-flex;gap:10px;align-items:center;min-width:130px}
+#app.v50-stage-orders #tableArea .vehicle-brand-cell img{width:41px;height:41px;max-width:41px;object-fit:contain;flex:0 0 auto}
+#app.v50-stage-orders #tableArea .vehicle-brand-name{font-weight:800;color:#f6f7f9}
+#app.v50-stage-orders #tableArea button[data-open-order]{appearance:none;background:linear-gradient(115deg,#f12541,#b30e29)!important;color:#fff!important;border:1px solid #ff5369!important;font-weight:900;border-radius:10px;padding:9px 15px;min-height:37px;cursor:pointer;box-shadow:0 5px 13px #aa142b30}
+#app.v50-stage-orders #tableArea button[data-open-order]:hover{filter:brightness(1.13)}
+@media(max-width:760px){
+ #app.v50-stage-orders>.section{padding:13px 10px;border-radius:13px}
+ #app.v50-stage-orders .toolbar{display:flex;flex-wrap:wrap;gap:9px}
+ #app.v50-stage-orders .toolbar .search{width:100%;flex-basis:100%}
+ #app.v50-stage-orders .toolbar .field{min-width:0;max-width:100%;flex:1 1 135px}
+ #app.v50-stage-orders #tableArea .table-wrap{border:0;background:transparent;overflow:visible}
+ #app.v50-stage-orders #tableArea table,#app.v50-stage-orders #tableArea tbody,#app.v50-stage-orders #tableArea tr{display:block;min-width:0!important;width:100%}
+ #app.v50-stage-orders #tableArea thead{display:none}
+ #app.v50-stage-orders #tableArea tr{margin:0 0 13px;padding:14px 12px;border:1px solid #42424c;border-radius:14px;background:linear-gradient(135deg,#20222a,#14161c);box-shadow:0 10px 22px #0004}
+ #app.v50-stage-orders #tableArea td{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-height:38px;padding:7px 0;border-bottom:1px solid #30343d;background:transparent!important;overflow-wrap:anywhere}
+ #app.v50-stage-orders #tableArea td:before{font-size:10px;text-transform:uppercase;letter-spacing:.65px;color:#9ca6b5;flex:0 0 90px;align-self:center;font-weight:750}
+ #app.v50-stage-orders #tableArea td:nth-child(1):before{content:'Zakázka'}
+ #app.v50-stage-orders #tableArea td:nth-child(2):before{content:'Datum'}
+ #app.v50-stage-orders #tableArea td:nth-child(3):before{content:'Příjezd'}
+ #app.v50-stage-orders #tableArea td:nth-child(4):before{content:'Zákazník'}
+ #app.v50-stage-orders #tableArea td:nth-child(5):before{content:'Vozidlo'}
+ #app.v50-stage-orders #tableArea td:nth-child(6):before{content:'Program'}
+ #app.v50-stage-orders #tableArea td:nth-child(7):before{content:'Cena'}
+ #app.v50-stage-orders #tableArea td:nth-child(8):before{content:'Stav'}
+ #app.v50-stage-orders #tableArea td:nth-child(9):before{content:''}
+ #app.v50-stage-orders #tableArea td:nth-child(9){border-bottom:0;padding-top:13px}
+ #app.v50-stage-orders #tableArea td:nth-child(9) button{width:100%;min-height:43px}
+ #app.v50-stage-orders #tableArea .vehicle-brand-cell{min-width:0}
+}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_06_ZAKAZKY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_07_ZAKAZNICI -->
+<style id="perfect-v50-design-07-customers">
+/* STAGE 02 / ZÁKAZNÍCI — dekorace jsou dynamicky určeny původním žebříčkem */
+#app.v50-stage-customers>.section{background:linear-gradient(160deg,#1a1d24,#111319);border-radius:19px;border:1px solid #3d4149;padding:22px;box-shadow:0 15px 44px #0005}
+#app.v50-stage-customers h3{font-size:22px;letter-spacing:-.4px;font-weight:900;color:#f6f7fa;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #333943}
+#app.v50-stage-customers #tableSearch{width:min(100%,520px);max-width:100%;margin-bottom:17px;min-height:44px;background:#1e2229;border:1px solid #464b55;color:#fff;border-radius:10px}
+#app.v50-stage-customers #tableArea .table-wrap{border-radius:15px;border:1px solid #383d46;overflow:auto;background:#14171d}
+#app.v50-stage-customers #tableArea table{min-width:735px;width:100%;border-collapse:separate;border-spacing:0}
+#app.v50-stage-customers #tableArea th{position:sticky;top:0;z-index:2;background:#222630;color:#b6c0cb;text-transform:uppercase;font-size:10px;letter-spacing:.7px;padding:14px 12px}
+#app.v50-stage-customers #tableArea td{vertical-align:middle;padding:11px 12px;border-bottom:1px solid #2e313a;color:#e8e9ed}
+#app.v50-stage-customers #tableArea tr:hover td{background:#29212a}
+#app.v50-stage-customers #tableArea .p50-person{display:inline-flex;align-items:center;gap:9px;min-height:52px}
+#app.v50-stage-customers #tableArea .p50-avatar-wrap{position:relative;min-width:48px;width:48px;padding-top:8px}
+#app.v50-stage-customers #tableArea .p50-avatar{width:42px;height:42px;border-radius:50%;border:2px solid #5a454f}
+#app.v50-stage-customers #tableArea .p50-crown{z-index:2;filter:drop-shadow(0 2px 3px #0009)}
+#app.v50-stage-customers #tableArea .p50-person-name{font-weight:800;color:#f6f6f8}
+#app.v50-stage-customers #tableArea [data-open-customer]{background:#281f28;border:1px solid #7f3d4b;border-radius:9px;padding:8px 12px;color:#fff;font-weight:850;white-space:nowrap}
+#app.v50-stage-customers #tableArea [data-open-customer]:hover{background:#9e2036}
+#customerCardOverlay .modal{max-width:min(980px,calc(100vw - 22px));background:linear-gradient(148deg,#1e2129,#101215);border:1px solid #64404d;border-radius:20px}
+#customerCardOverlay .modal-head{border-bottom:1px solid #393b46;padding-bottom:18px;margin-bottom:17px}
+#customerCardOverlay .profile-stat{background:#20232c;border:1px solid #3a3d47;border-radius:13px}
+#customerCardOverlay .customer-profile-hero .p50-avatar{width:74px;height:74px;border-radius:50%;border:3px solid #a43a50}
+#customerCardOverlay .section{background:#161920;border:1px solid #343942;border-radius:13px}
+@media(max-width:760px){
+ #app.v50-stage-customers>.section{padding:13px 10px;border-radius:13px}
+ #app.v50-stage-customers h3{font-size:19px}
+ #app.v50-stage-customers #tableArea .table-wrap{border:0;overflow:visible;background:transparent}
+ #app.v50-stage-customers #tableArea table,#app.v50-stage-customers #tableArea tbody,#app.v50-stage-customers #tableArea tr{display:block;width:100%;min-width:0!important}
+ #app.v50-stage-customers #tableArea thead{display:none}
+ #app.v50-stage-customers #tableArea tr{background:#1d2027;border:1px solid #3b414b;border-radius:13px;margin:0 0 12px;padding:13px 12px}
+ #app.v50-stage-customers #tableArea td{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #2c323c;background:transparent!important;overflow-wrap:anywhere}
+ #app.v50-stage-customers #tableArea td:nth-child(1){border-bottom:1px solid #43434c;padding-bottom:12px;margin-bottom:6px}
+ #app.v50-stage-customers #tableArea td:nth-child(n+2):before{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#a6afbc;font-weight:800;min-width:74px;align-self:center}
+ #app.v50-stage-customers #tableArea td:nth-child(2):before{content:'Telefon'}
+ #app.v50-stage-customers #tableArea td:nth-child(3):before{content:'E-mail'}
+ #app.v50-stage-customers #tableArea td:nth-child(4):before{content:'Vozidla'}
+ #app.v50-stage-customers #tableArea td:nth-child(5):before{content:'Návštěvy'}
+ #app.v50-stage-customers #tableArea td:nth-child(6):before{content:''}
+ #app.v50-stage-customers #tableArea td:nth-child(6){border-bottom:0}
+ #app.v50-stage-customers #tableArea td:nth-child(6) button{width:100%;min-height:42px}
+ #customerCardOverlay .modal{margin:8px;max-width:calc(100vw - 16px)}
+}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_07_ZAKAZNICI -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_08_VOZIDLA -->
+<style id="perfect-v50-design-08-vehicles">
+/* STAGE 02 / VOZIDLA — používají se výhradně loga automobilek ze stávající evidence */
+#app.v50-stage-vehicles>.section{background:linear-gradient(155deg,#1b1e24,#111318);border-radius:19px;border:1px solid #3f4047;padding:22px;box-shadow:0 15px 42px #0005}
+#app.v50-stage-vehicles h3{font-size:22px;font-weight:900;color:#f4f6f8;margin:0 0 17px;padding-bottom:17px;border-bottom:1px solid #363a43}
+#app.v50-stage-vehicles #tableSearch{width:min(100%,520px);max-width:100%;min-height:44px;border-radius:10px;background:#1d2027;color:#fff;border:1px solid #4a4d56;margin-bottom:16px}
+#app.v50-stage-vehicles #tableArea .table-wrap{border:1px solid #373c45;border-radius:14px;overflow:auto;background:#15181d}
+#app.v50-stage-vehicles #tableArea table{min-width:660px;width:100%;border-collapse:separate;border-spacing:0}
+#app.v50-stage-vehicles #tableArea th{background:#22262e;color:#bec5ce;font-size:10px;text-transform:uppercase;letter-spacing:.65px;padding:13px 12px}
+#app.v50-stage-vehicles #tableArea td{border-bottom:1px solid #2c3039;padding:13px 12px;color:#e8e9ed}
+#app.v50-stage-vehicles #tableArea tr:hover td{background:#29212a}
+#app.v50-stage-vehicles #tableArea .vehicle-brand-cell{display:inline-flex;align-items:center;gap:14px;min-height:55px}
+#app.v50-stage-vehicles #tableArea .vehicle-brand-cell img{width:54px;height:54px;object-fit:contain;max-width:54px;border-radius:8px;background:#f3f5f70a}
+#app.v50-stage-vehicles #tableArea .vehicle-brand-name{font-weight:900;font-size:14px;line-height:1.35;color:#fff}
+#app.v50-stage-vehicles #tableArea [data-open-vehicle]{border:1px solid #b82e45;background:linear-gradient(110deg,#df1c3c,#ad112b);color:white;padding:10px 14px;border-radius:10px;font-weight:850;white-space:nowrap}
+#app.v50-stage-vehicles #tableArea [data-open-vehicle]:hover{filter:brightness(1.15)}
+#vehicleDetailOverlay .modal{max-width:min(920px,calc(100vw - 22px));background:linear-gradient(160deg,#20232a,#121519);border:1px solid #553e48;border-radius:19px}
+#vehicleDetailOverlay .perfect-card-vehicle-brand{display:flex;align-items:center;gap:16px}
+#vehicleDetailOverlay .perfect-card-vehicle-brand img{width:79px;height:79px;object-fit:contain;max-width:79px}
+#vehicleDetailOverlay .profile-stat{background:#20242b;border:1px solid #414550;border-radius:12px}
+@media(max-width:760px){
+ #app.v50-stage-vehicles>.section{padding:13px 10px;border-radius:13px}
+ #app.v50-stage-vehicles h3{font-size:19px}
+ #app.v50-stage-vehicles #tableArea .table-wrap{overflow:visible;border:0;background:transparent}
+ #app.v50-stage-vehicles #tableArea table,#app.v50-stage-vehicles #tableArea tbody,#app.v50-stage-vehicles #tableArea tr{min-width:0!important;width:100%;display:block}
+ #app.v50-stage-vehicles #tableArea thead{display:none}
+ #app.v50-stage-vehicles #tableArea tr{padding:14px 12px;border-radius:13px;background:#1e2128;border:1px solid #3e424c;margin:0 0 13px}
+ #app.v50-stage-vehicles #tableArea td{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #30343e;padding:9px 0;background:transparent!important}
+ #app.v50-stage-vehicles #tableArea td:first-child{border-bottom:1px solid #494550;padding-bottom:14px}
+ #app.v50-stage-vehicles #tableArea td:nth-child(n+2):before{font-size:10px;letter-spacing:.65px;text-transform:uppercase;color:#aeb5c0;font-weight:750}
+ #app.v50-stage-vehicles #tableArea td:nth-child(2):before{content:'Majitel'}
+ #app.v50-stage-vehicles #tableArea td:nth-child(3):before{content:'Objednávky'}
+ #app.v50-stage-vehicles #tableArea td:nth-child(4):before{content:''}
+ #app.v50-stage-vehicles #tableArea td:nth-child(4){border-bottom:0;padding-top:14px}
+ #app.v50-stage-vehicles #tableArea td:nth-child(4) button{min-height:44px;width:100%}
+ #vehicleDetailOverlay .perfect-card-vehicle-brand img{width:59px;height:59px}
+}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_08_VOZIDLA -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_09_AKTIVACE -->
+<script id="perfect-v50-design-09-controller">
+(function(){
+ 'use strict';
+ if(window.__perfectV50DesignStage2)return;
+ window.__perfectV50DesignStage2=true;
+ const pages=['dashboard','orders','customers','vehicles'];
+ const app=document.getElementById('app');
+ const nav=document.getElementById('navigation');
+ if(!app||!nav)return;
+ let pending=false;
+ function refresh(){
+   pending=false;
+   const active=nav.querySelector('[data-page].active');
+   const name=active?String(active.getAttribute('data-page')||''):'';
+   for(const page of pages){app.classList.toggle('v50-stage-'+page,page===name)}
+ }
+ function schedule(){if(pending)return;pending=true;requestAnimationFrame(refresh)}
+ const observer=new MutationObserver(schedule);
+ observer.observe(nav,{attributes:true,attributeFilter:['class','aria-current','aria-selected'],subtree:true,childList:true});
+ observer.observe(app,{childList:true});
+ document.addEventListener('click',schedule,true);
+ refresh();
+ // Diagnostika pouze pro čtení: žádné změny dat.
+ window.perfectV50DesignStage2Check=function(){
+   const view=nav.querySelector('[data-page].active');
+   const page=view?view.getAttribute('data-page'):'';
+   const loaded=pages.every(p=>!!document.getElementById('perfect-v50-design-'+({'dashboard':'05-dashboard','orders':'06-orders','customers':'07-customers','vehicles':'08-vehicles'}[p])));
+   return {ready:loaded,activePage:page,styleCount:pages.filter(p=>!!document.getElementById('perfect-v50-design-'+({'dashboard':'05-dashboard','orders':'06-orders','customers':'07-customers','vehicles':'08-vehicles'}[p]))).length,appFound:!!app,loginUnaffected:!document.querySelector('#authGate.v50-stage-dashboard')};
+ };
+})();
+</script>
+<!-- END PERFECT_V50_DESIGN_09_AKTIVACE -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_10_KALENDAR -->
+<style id="perfect-v50-design-10">
+/* PERFECT V50 | Modul 10 KALENDAR | Pouze prezentační vrstva */
+/* Návaznost na skutečný kalendář: .perfect-calendar-v50, data-calendar-* */
+body[data-v50-view="calendar"] #app>.perfect-calendar-v50{padding:22px;border-radius:20px;background:linear-gradient(155deg,#1d2028,#111319 75%);border:1px solid #45414b;box-shadow:0 22px 55px #0007}
+.perfect-calendar-v50 .perfect-calendar-toolbar-v50{gap:18px;padding-bottom:20px;margin-bottom:17px;border-bottom:1px solid #373a42}
+.perfect-calendar-v50 .perfect-calendar-toolbar-v50 h3{font-size:23px;font-weight:900;letter-spacing:-.5px;color:#fff}
+.perfect-calendar-v50 .perfect-calendar-actions-v50{gap:8px}
+.perfect-calendar-v50 [data-calendar-prev],.perfect-calendar-v50 [data-calendar-next]{background:#292c34!important;border:1px solid #54525b!important;min-height:43px}
+.perfect-calendar-v50 [data-calendar-today]{background:#bd1e35!important;color:#fff!important;border:1px solid #e34a5c!important;min-height:43px}
+.perfect-calendar-v50 [data-calendar-date]{min-height:43px;min-width:160px;background:#1c2027;color:#fff;color-scheme:dark;border-radius:10px}
+.perfect-calendar-v50 .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px;min-width:840px}
+.perfect-calendar-v50 .calendar-grid .day{padding:12px 10px;min-height:174px;background:#171a21;border:1px solid #3a3f4b;border-radius:14px;box-shadow:0 10px 19px #0003}
+.perfect-calendar-v50 .calendar-grid .day .dayhead{font-weight:900;letter-spacing:.25px;font-size:13px;padding:6px 7px;margin:-4px -3px 13px;border-radius:7px}
+.perfect-calendar-v50 .calendar-grid .day.perfect-calendar-weekend-v50{border:2px solid #e24e64!important;background:linear-gradient(170deg,#42202b,#21171d 68%)!important}
+.perfect-calendar-v50 .calendar-grid .day.perfect-calendar-weekend-v50 .dayhead{background:#a21c35!important;color:#fff!important;letter-spacing:1px}
+.perfect-calendar-v50 .calendar-grid .day.perfect-calendar-today-v50{box-shadow:inset 0 0 0 1px #ffd18d,0 0 0 2px #eebf6d}
+.perfect-calendar-v50 button:focus-visible,.perfect-calendar-v50 input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:900px){body[data-v50-view="calendar"] #app>.perfect-calendar-v50{padding:14px}.perfect-calendar-v50 .perfect-calendar-scroll-v50{overflow-x:auto;padding-bottom:8px}.perfect-calendar-v50 .calendar-grid{min-width:920px}}
+@media(max-width:600px){.perfect-calendar-v50 .perfect-calendar-actions-v50{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.perfect-calendar-v50 .perfect-calendar-jump-v50{grid-column:1/-1}.perfect-calendar-v50 .perfect-calendar-toolbar-v50 h3{font-size:21px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_10_KALENDAR -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_11_DETAILING -->
+<style id="perfect-v50-design-11">
+/* PERFECT V50 | Modul 11 DETAILING | Pouze prezentační vrstva */
+/* Detailing: samostatná zlatá identita, bez změn ukládání zakázek. */
+body.detailing-theme{--v50-detail-gold:#e0bc70;--v50-detail-line:#615237;--v50-detail-bg:#13120e}
+body.detailing-theme #app{color:#f4efe4}
+body.detailing-theme #app>.d44,body.detailing-theme #app .d44{--d44-gold:#e1bd71}
+body.detailing-theme .d44 .d44-hero{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;border:1px solid #806638!important;background:linear-gradient(110deg,#100e0bee,#241e13d9 70%,#13100cc9),var(--perfect-detailing-background,linear-gradient(145deg,#34291a,#14110b));background-size:cover;background-position:center;box-shadow:0 23px 60px #0008}
+body.detailing-theme .d44 .d44-hero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#11100ee8,#1b1918a8,transparent)}
+body.detailing-theme .d44 .d44-kicker{color:#e7c985;letter-spacing:1.7px;text-transform:uppercase;font-weight:900}
+body.detailing-theme .d44 .d44-summary{display:grid;gap:13px;align-items:stretch}
+body.detailing-theme .d44 .d44-metric{background:linear-gradient(155deg,#292418,#171510);border:1px solid #665536;border-radius:14px;padding:15px;box-shadow:0 10px 26px #0004}
+body.detailing-theme .d44 .d44-tools{gap:10px;flex-wrap:wrap}
+body.detailing-theme .d44 .d44-tabs{border-bottom:1px solid #5a4c32;gap:7px;flex-wrap:wrap}
+body.detailing-theme .d44 .d44-tabs button[aria-selected="true"],body.detailing-theme .d44 .d44-tabs button.active{background:#8b6c2e;color:#fff;border-color:#c19d53}
+body.detailing-theme .d44 :is(button,input,textarea,select):focus-visible{outline:2px solid #ebd08e;outline-offset:2px}
+@media(max-width:680px){body.detailing-theme .d44 .d44-hero{border-radius:14px}body.detailing-theme .d44 .d44-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_11_DETAILING -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_12_KARTA_DETAILINGOVE_ZAKAZKY -->
+<style id="perfect-v50-design-12">
+/* PERFECT V50 | Modul 12 KARTA_DETAILINGOVE_ZAKAZKY | Pouze prezentační vrstva */
+/* Skutečný overlay DETAILING V44; obsah a pole poznámek zůstávají původní. */
+.d44 .modal,.overlay:has(.d44-grid) .modal{background:linear-gradient(160deg,#201c15,#12120f);border:1px solid #706044;border-radius:19px;box-shadow:0 28px 80px #000c;max-width:min(960px,96vw)}
+.d44-grid{gap:16px;align-items:start}
+.d44-grid :is(input,textarea,select){background:#1d1c1b;color:#fff;border:1px solid #786742;border-radius:10px;min-height:42px}
+.d44-grid textarea,.d44-note textarea,.d44 textarea[name*="poznam" i],.d44 textarea[name*="note" i]{min-height:125px!important;resize:vertical!important;line-height:1.55;display:block;width:100%;background:#1c1b19;border:1px solid #8a754b;border-radius:11px;padding:12px;color:#fff}
+.d44 .d44-note{padding:13px;border:1px solid #685839;border-radius:11px;background:#211e17}
+.d44 .d44-photo-strip,.d44 .d44-gallery{gap:9px}
+.d44 .d44-photo{border:1px solid #6b5c3c;border-radius:11px;overflow:hidden}
+.d44 .d44-total{background:#282115;border:1px solid #aa8748;padding:13px;border-radius:12px;color:#f1d187;font-weight:850}
+.d44 .form-actions{position:relative;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding-top:18px;border-top:1px solid #51452d}
+.d44 .form-actions button:not(.secondary){background:#b58b40;color:#11100d;border-radius:10px;font-weight:900}
+@media(max-width:700px){.d44-grid{display:grid;grid-template-columns:1fr!important}.d44 .form-actions button{flex:1;min-height:46px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_12_KARTA_DETAILINGOVE_ZAKAZKY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_13_BOXY_A_VYDELKY -->
+<style id="perfect-v50-design-13">
+/* PERFECT V50 | Modul 13 BOXY_A_VYDELKY | Pouze prezentační vrstva */
+/* Přísně prezentační vrstva: nezásah do 1400 + 25% nad 6000 ani společných podílů. */
+body.b49-theme #app .b49{--v50-box-red:#f04458;--v50-box-border:#464b55}
+.b49 .main{width:min(100%,1680px);margin:0 auto}
+.b49 .heading{border-bottom:1px solid #393f48;padding-bottom:17px;margin-bottom:17px;gap:16px}
+.b49 .heading h1{font-size:clamp(21px,2.4vw,30px);font-weight:900;letter-spacing:-.75px}
+.b49 .datebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.b49 [data-b49-content]>.baylayout{display:grid;grid-template-columns:minmax(250px,1fr) minmax(330px,1.3fr) minmax(250px,1fr);gap:14px;align-items:start}
+.b49 .boxcol,.b49 .centercol,.b49 .shared,.b49 .panel{border:1px solid #474b55!important;border-radius:18px!important;background:linear-gradient(145deg,#1b1f25,#11141a);box-shadow:0 18px 38px #0006;min-width:0}
+.b49 .bayhero{border-bottom:1px solid #444953;padding-bottom:12px;margin-bottom:15px}
+.b49 .bayhero h2{font-size:22px;letter-spacing:-.4px}
+.b49 .b49-order,.b49 .b49-job,.b49 .shareditem{border:1px solid #3b414d;border-radius:12px;background:#1a1d24;margin-bottom:8px;overflow:hidden}
+.b49 .b49-order .price,.b49 .shareditem .price,.b49 .b49-job .price{font-weight:900;color:#f5d7a3;white-space:nowrap}
+.b49 .s-main{display:flex;align-items:center;gap:9px;min-width:0}
+.b49 .s-main img,.b49 .vehicle-brand-logo{object-fit:contain;max-width:48px;max-height:43px}
+.b49 .confirmline{display:flex;flex-wrap:wrap;align-items:center;gap:9px;border:1px solid #72533c;background:#2b231d;border-radius:12px;padding:12px}
+.b49 .confirmline .checklabel{font-size:12px;line-height:1.45;font-weight:800}
+.b49 input[type="checkbox"]{accent-color:#ed3650;width:17px;height:17px}
+.b49 .split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:9px}
+.b49 [data-b49-split],.b49 [data-b49-worker],.b49 [data-b49-weekend]{min-height:42px;border-radius:9px;background:#181b22;color:#fff;border:1px solid #59606c}
+.b49 [data-b49-confirm-shared],.b49 [data-b49-assign],.b49 [data-b49-pay]{background:#c5223c;color:white;border-color:#ed4661;font-weight:900}
+.b49 [data-b50-close]{background:linear-gradient(100deg,#a6253e,#db3b52);border:1px solid #e56c7a;font-weight:900;min-height:45px}
+.b49 :is(button,input,select):focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:1150px){.b49 [data-b49-content]>.baylayout{grid-template-columns:1fr!important}.b49 .centercol{grid-row:1}}
+@media(max-width:620px){.b49 .main{padding:12px}.b49 .heading{flex-wrap:wrap}.b49 .split{grid-template-columns:1fr 1fr}.b49 .s-main{flex-wrap:wrap}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_13_BOXY_A_VYDELKY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_14_DARKOVE_POUKAZY -->
+<style id="perfect-v50-design-14">
+/* PERFECT V50 | Modul 14 DARKOVE_POUKAZY | Pouze prezentační vrstva */
+/* Původní obrázky hodnot mají zůstat; žádné nové obrázky nenahrazují originály. */
+body.v49-theme #app .v49{--v50-voucher-gold:#edc779}
+body.v49-theme .v49 .hero{border:1px solid #665033;border-radius:20px;overflow:hidden;background:linear-gradient(140deg,#251d13,#131313);box-shadow:0 19px 46px #0007}
+body.v49-theme .v49 .hero h1,body.v49-theme .v49 .hero h2{letter-spacing:-.55px}
+body.v49-theme #app .v36-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;align-items:stretch}
+body.v49-theme #app .v36-gift,body.v49-theme #app .vcard,body.v49-theme #app [data-voucher-value],body.v49-theme #app [data-voucher-amount]{position:relative;border:1px solid #8b6b40!important;border-radius:15px!important;overflow:hidden;background:#1b1712;color:#f8ecd5;cursor:pointer;box-shadow:0 16px 32px #0006;transition:transform .18s,border-color .18s,box-shadow .18s}
+body.v49-theme #app .v36-gift:hover,body.v49-theme #app .vcard:hover,body.v49-theme #app [data-voucher-value]:hover{transform:translateY(-3px);border-color:#f2ca79!important;box-shadow:0 18px 43px #0008}
+body.v49-theme #app .v36-art{display:flex;justify-content:center;align-items:center;min-height:125px;overflow:hidden}
+body.v49-theme #app .v36-art img,body.v49-theme #app .vcard img{width:100%;height:100%;object-fit:contain;display:block}
+body.v49-theme #app .v36-gift-value{font-size:clamp(24px,2.3vw,35px);font-weight:950;color:#f9d68b;letter-spacing:-.8px;text-shadow:0 3px 8px #0009;white-space:nowrap}
+body.v49-theme #app .v36-gift.selected,body.v49-theme #app .vcard.selected,body.v49-theme #app [aria-pressed="true"][data-voucher-value]{border-color:#ffdf9c!important;box-shadow:0 0 0 2px #f4ca75,0 16px 30px #0006}
+body.v49-theme #app .selected-details{border:1px solid #735d42;border-radius:14px;background:#211d17;padding:15px}
+body.v49-theme #app .v36-table{width:100%}
+body.v49-theme #app .v36-table th{background:#26221f;color:#f3d6a6}
+body.v49-theme #app .v36-table td{border-bottom:1px solid #43372f;padding-block:11px}
+body.v49-theme #app :is(button,input,select):focus-visible{outline:2px solid #ffd58b;outline-offset:2px}
+@media(max-width:850px){body.v49-theme #app .v36-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){body.v49-theme #app .v36-grid{grid-template-columns:1fr}body.v49-theme #app .v36-art{min-height:110px}body.v49-theme #app .v36-gift-value{font-size:28px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_14_DARKOVE_POUKAZY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_15_PLATBY -->
+<style id="perfect-v50-design-15">
+/* PERFECT V50 | Modul 15 PLATBY | Pouze prezentační vrstva */
+/* Schválená struktura plateb beze změny; úpravy pouze komfort a čitelnost. */
+body[data-v50-view="payments"] #app>.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+body[data-v50-view="payments"] #app>.cards>.card{background:linear-gradient(160deg,#22242c,#17191e);border:1px solid #434753;border-radius:15px;padding:19px;box-shadow:0 12px 30px #0004}
+body[data-v50-view="payments"] #app .number{font-weight:950;color:#fff;letter-spacing:-.5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+body[data-v50-view="payments"] #app>.section{border:1px solid #41454f;border-radius:18px;background:linear-gradient(160deg,#1b1d24,#13151b);padding:20px}
+body[data-v50-view="payments"] #app .table-wrap{max-width:100%;overflow-x:auto;border:1px solid #393e46;border-radius:13px}
+body[data-v50-view="payments"] #app table{width:100%;min-width:770px;border-collapse:separate;border-spacing:0}
+body[data-v50-view="payments"] #app th{position:sticky;top:0;background:#272b34;color:#bac3d1;text-transform:uppercase;font-size:11px;letter-spacing:.5px;padding:14px 12px}
+body[data-v50-view="payments"] #app td{padding:12px;border-bottom:1px solid #323740}
+body[data-v50-view="payments"] #app tr:hover td{background:#30242d}
+body[data-v50-view="payments"] #app td:nth-child(5){font-weight:900;color:#f6d2a8;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:1080px){body[data-v50-view="payments"] #app>.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){body[data-v50-view="payments"] #app>.cards{gap:8px}body[data-v50-view="payments"] #app>.cards>.card{padding:12px}body[data-v50-view="payments"] #app .number{font-size:22px}body[data-v50-view="payments"] #app>.section{padding:12px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_15_PLATBY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_16_SLUZBY_A_CENIK -->
+<style id="perfect-v50-design-16">
+/* PERFECT V50 | Modul 16 SLUZBY_A_CENIK | Pouze prezentační vrstva */
+/* Schválený formulář cen neměníme; částky zůstávají ručně editovatelné. */
+body[data-v50-view="services"] #app>.section{background:linear-gradient(160deg,#1d2027,#11141b);border:1px solid #41444d;border-radius:19px;padding:21px;box-shadow:0 12px 35px #0005}
+body[data-v50-view="services"] #app .section-head{gap:14px;border-bottom:1px solid #373c44;padding-bottom:15px;margin-bottom:14px}
+body[data-v50-view="services"] #app .section-head h3{font-size:22px;font-weight:900;letter-spacing:-.4px}
+body[data-v50-view="services"] #app .section-head button{min-height:43px;background:#c5223a;border:1px solid #e94d62;border-radius:9px;color:#fff;font-weight:850}
+body[data-v50-view="services"] #app .notice{padding:12px 15px;background:#29212a;border:1px solid #6c3a48;border-radius:11px;color:#eec9d0}
+body[data-v50-view="services"] #app .table-wrap{max-width:100%;overflow:auto;border:1px solid #3c4049;border-radius:12px}
+body[data-v50-view="services"] #app table{min-width:750px;width:100%;border-collapse:separate;border-spacing:0}
+body[data-v50-view="services"] #app th{background:#272b34;color:#b9c2cd;letter-spacing:.5px;text-transform:uppercase;font-size:11px;padding:12px}
+body[data-v50-view="services"] #app td{padding:12px;vertical-align:middle;border-bottom:1px solid #333842}
+body[data-v50-view="services"] #app tr:hover td{background:#28232b}
+body[data-v50-view="services"] #app input[type="number"]{appearance:textfield;min-height:44px;background:#1d2129;color:#fff;border:1px solid #565d69;border-radius:9px}
+@media(max-width:580px){body[data-v50-view="services"] #app>.section{padding:12px}body[data-v50-view="services"] #app .section-head button{width:100%}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_16_SLUZBY_A_CENIK -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_17_STATISTIKY_FINANCE -->
+<style id="perfect-v50-design-17">
+/* PERFECT V50 | Modul 17 STATISTIKY_FINANCE | Pouze prezentační vrstva */
+/* V39 finance: pouze styly již povolených reportů; žádné odkrývání dat pracovníkům. */
+#perfectReports39{--r39-red:#f23e56;--r39-line:#414653;color:#f3f4f7}
+#perfectReports39 .r39-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1px solid #414650;border-radius:13px;background:#191d25}
+#perfectReports39 .r39-tabs button{min-height:39px;border-radius:9px}
+#perfectReports39 .r39-tabs button.active,#perfectReports39 .r39-tabs button[aria-selected="true"]{background:#bb2540;color:white;border-color:#db455c}
+#perfectReports39 .r39-grid{gap:13px;align-items:stretch}
+#perfectReports39 .r39-card,#perfectReports39 .r39-panel{background:linear-gradient(150deg,#20232c,#14171d);border:1px solid #454a53;border-radius:16px;box-shadow:0 12px 31px #0004}
+#perfectReports39 .r39-value{color:#fff;font-weight:950;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+#perfectReports39 .r39-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#perfectReports39 .r39-controls :is(select,input){min-height:43px;background:#1a1d25;color:#fff;border:1px solid #59616b;border-radius:9px;color-scheme:dark}
+#perfectReports39 .r39-chart{min-height:220px;max-width:100%;overflow:hidden}
+#perfectReports39 .r39-table{overflow:auto;max-width:100%}
+#perfectReports39 .r39-table table{width:100%;min-width:700px}
+#perfectReports39 .r39-table th{background:#262b34;color:#b7c3d0;padding:12px}
+#perfectReports39 .r39-table td{padding:11px;border-bottom:1px solid #353a45}
+#perfectReports39 :is(button,input,select):focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:700px){#perfectReports39 .r39-grid{grid-template-columns:1fr 1fr}#perfectReports39 .r39-card{padding:12px}#perfectReports39 .r39-controls{display:grid;grid-template-columns:1fr 1fr}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_17_STATISTIKY_FINANCE -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_18_STATISTIKY_ZAMESTNANCI -->
+<style id="perfect-v50-design-18">
+/* PERFECT V50 | Modul 18 STATISTIKY_ZAMESTNANCI | Pouze prezentační vrstva */
+/* Statistiky zaměstnanců: vizuální oddělení od finančních výsledků firmy. */
+#perfectReports39 .r39-ranking{display:grid;gap:9px;margin-top:12px}
+#perfectReports39 .r39-rank-line{display:grid;grid-template-columns:minmax(112px,1fr) minmax(80px,2fr) auto;align-items:center;gap:11px;padding:9px 11px;background:#1e2229;border:1px solid #3d4350;border-radius:10px}
+#perfectReports39 .r39-rank-line:nth-child(1){border-color:#a78342;background:linear-gradient(90deg,#342916,#202126)}
+#perfectReports39 .r39-rank-line:nth-child(2){border-color:#878e9a}
+#perfectReports39 .r39-rank-line:nth-child(3){border-color:#906e55}
+#perfectReports39 .r39-rank-line b{color:#f4f5f7;white-space:nowrap;font-variant-numeric:tabular-nums}
+#perfectReports39 .r39-track{background:#303743;height:9px;border-radius:99px;overflow:hidden}
+#perfectReports39 .r39-fill{background:linear-gradient(90deg,#b62440,#ed5267);height:100%;border-radius:99px}
+#perfectReports39 .r42-day-card{background:#1c2028;border:1px solid #3e4550;border-radius:14px;padding:15px}
+#perfectReports39 .r42-day-grid{gap:11px}
+#perfectReports39 .r42-day-table{overflow-x:auto}
+#perfectReports39 .r42-day-table table{min-width:670px}
+#perfectReports39 .r42-day-card button:focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:600px){#perfectReports39 .r39-rank-line{grid-template-columns:minmax(0,1fr) auto;gap:7px}#perfectReports39 .r39-rank-line .r39-track{grid-column:1/-1;grid-row:2}#perfectReports39 .r42-day-grid{grid-template-columns:1fr}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_18_STATISTIKY_ZAMESTNANCI -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_19_MOJE_STATISTIKY -->
+<style id="perfect-v50-design-19">
+/* PERFECT V50 | Modul 19 MOJE_STATISTIKY | Pouze prezentační vrstva */
+/* Osobní data: nikdy nedopočítávat mzdy z designové vrstvy. */
+.perfect-profile-dialog .pp-tabs{display:flex;gap:7px;flex-wrap:wrap;border-bottom:1px solid #444954;padding-bottom:13px}
+.perfect-profile-dialog .pp-tab{min-height:42px;padding:10px 15px;border:1px solid #4b515e;background:#21252e;color:#e4e7ed;border-radius:10px;font-weight:800}
+.perfect-profile-dialog .pp-tab.active,.perfect-profile-dialog .pp-tab[aria-selected="true"]{background:#b92641;color:white;border-color:#ee5265}
+.perfect-profile-dialog [data-pp-panel="stats"] .pp-head,.perfect-profile-dialog [data-pp-panel="finance"] .pp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.perfect-profile-dialog .pp-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.perfect-profile-dialog .pp-card{background:linear-gradient(140deg,#242833,#151920);border:1px solid #434957;border-radius:15px;padding:17px;text-align:left;min-width:0}
+.perfect-profile-dialog .pp-card strong{display:block;margin:9px 0;font-size:clamp(24px,3vw,36px);color:#fff;font-variant-numeric:tabular-nums}
+.perfect-profile-dialog .pp-block{background:#1a1d24;border:1px solid #3d434c;border-radius:13px;padding:16px;margin-top:14px}
+.perfect-profile-dialog .pp-row{display:flex;gap:10px;align-items:center;padding:11px 7px;border-bottom:1px solid #393f49;min-width:0}
+.perfect-profile-dialog .pp-row:last-child{border-bottom:0}
+.perfect-profile-dialog .pp-grow{min-width:0;flex:1}
+.perfect-profile-dialog .pp-chip{border-radius:99px;background:#432b38;border:1px solid #704459;color:#ffdae2;padding:5px 8px}
+.perfect-profile-dialog .pp-bar{height:8px;border-radius:99px;overflow:hidden;background:#323942}
+.perfect-profile-dialog .pp-bar i{display:block;background:linear-gradient(90deg,#b2223d,#ec546b);height:100%}
+.perfect-profile-dialog :is(button,input,select):focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:560px){.perfect-profile-dialog .pp-cards{grid-template-columns:1fr}.perfect-profile-dialog .pp-row{flex-wrap:wrap}.perfect-profile-dialog .pp-tab{flex:1}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_19_MOJE_STATISTIKY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_20_NASTAVENI -->
+<style id="perfect-v50-design-20">
+/* PERFECT V50 | Modul 20 NASTAVENI | Pouze prezentační vrstva */
+/* Schválený vzhled nastavení zachována struktura a navigace. */
+body[data-v50-view="settings"] #app>.section{background:linear-gradient(155deg,#1d2129,#12151b);border:1px solid #444956;border-radius:18px;padding:22px;box-shadow:0 18px 44px #0005}
+body[data-v50-view="settings"] #app>.section h3{font-size:21px;font-weight:900;letter-spacing:-.3px}
+body[data-v50-view="settings"] #app .toolbar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+body[data-v50-view="settings"] #app .profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px}
+body[data-v50-view="settings"] #app .profile-stat{border:1px solid #414752;border-radius:13px;background:#1d222b;padding:15px;min-width:0}
+body[data-v50-view="settings"] #app .profile-stat small{display:block;color:#b1bbc8;line-height:1.5}
+body[data-v50-view="settings"] #app .profile-stat b{font-size:24px;font-weight:950;color:#fff}
+body[data-v50-view="settings"] #app .notice{border-radius:12px;border:1px solid #66535b;background:#30242a;padding:13px}
+body[data-v50-view="settings"] #app :is(button,input,select):focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:680px){body[data-v50-view="settings"] #app>.section{padding:13px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_20_NASTAVENI -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_21_NASTAVENI_PROVOZ -->
+<style id="perfect-v50-design-21">
+/* PERFECT V50 | Modul 21 NASTAVENI_PROVOZ | Pouze prezentační vrstva */
+/* Provozní podsekce nastavení; žádné zásahy do spouštěčů ani DB. */
+body[data-v50-view="settings"] #app [data-settings-tab="operations"],body[data-v50-view="settings"] #app [data-settings-tab="provoz"]{border-radius:10px}
+body[data-v50-view="settings"] #app .settings-tabs,body[data-v50-view="settings"] #app .tabbar{display:flex;gap:8px;flex-wrap:wrap;padding:6px;background:#1b2027;border:1px solid #454b55;border-radius:13px}
+body[data-v50-view="settings"] #app .settings-tabs button,body[data-v50-view="settings"] #app .tabbar button{padding:10px 14px;min-height:42px;border-radius:9px}
+body[data-v50-view="settings"] #app .settings-tabs button.active,body[data-v50-view="settings"] #app .tabbar button.active{background:#be2540;color:#fff}
+body[data-v50-view="settings"] #app .service{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 10px;border-bottom:1px solid #393f48}
+body[data-v50-view="settings"] #app .service:last-child{border-bottom:0}
+body[data-v50-view="settings"] #app input[type="checkbox"]{accent-color:#d22f48;width:17px;height:17px}
+@media(max-width:680px){body[data-v50-view="settings"] #app .service{align-items:flex-start;flex-direction:column}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_21_NASTAVENI_PROVOZ -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_22_NASTAVENI_DATA_ZALOHY -->
+<style id="perfect-v50-design-22">
+/* PERFECT V50 | Modul 22 NASTAVENI_DATA_ZALOHY | Pouze prezentační vrstva */
+/* Pouze vizuál přehledů dat/záloh: mazací a zálohovací funkce zůstávají původní. */
+body[data-v50-view="settings"] #app .p40-audit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px}
+body[data-v50-view="settings"] #app .p40-sub{padding:13px;border:1px solid #454852;border-radius:12px;background:#1d2028}
+body[data-v50-view="settings"] #app .table-wrap{max-width:100%;overflow-x:auto;border:1px solid #3c4149;border-radius:13px}
+body[data-v50-view="settings"] #app .table-wrap table{min-width:630px;width:100%}
+body[data-v50-view="settings"] #app .table-wrap th{background:#252933;color:#bec4d0;padding:12px}
+body[data-v50-view="settings"] #app .table-wrap td{border-bottom:1px solid #353c45;padding:10px}
+body[data-v50-view="settings"] #app [data-settings-tab="backup"],body[data-v50-view="settings"] #app [data-settings-tab="data"]{border-radius:9px}
+body[data-v50-view="settings"] #app .pill.warn{border:1px solid #9d6c4b;background:#4b3221;color:#ffd5ad}
+@media(max-width:580px){body[data-v50-view="settings"] #app .p40-audit-grid{grid-template-columns:1fr}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_22_NASTAVENI_DATA_ZALOHY -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_23_SPRAVA_UZIVATELU -->
+<style id="perfect-v50-design-23">
+/* PERFECT V50 | Modul 23 SPRAVA_UZIVATELU | Pouze prezentační vrstva */
+/* Graphite uživatelé - práva určuje výhradně backend (nikoliv CSS). */
+.g45 .g45-user-layout{display:grid;grid-template-columns:minmax(235px,1fr) minmax(320px,1.65fr);gap:17px;align-items:start}
+.g45 .g45-panel{border:1px solid #424954;border-radius:16px;background:linear-gradient(145deg,#20242c,#14171e);box-shadow:0 13px 36px #0005;min-width:0}
+.g45 .g45-panel-head{padding:16px;border-bottom:1px solid #393f48;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.g45 .g45-user-list{display:grid;gap:7px;padding:10px}
+.g45 .g45-user-row{display:flex;align-items:center;gap:10px;border:1px solid #373e48;border-radius:11px;padding:11px;background:#1c2028;min-width:0}
+.g45 .g45-user-row.active,.g45 .g45-user-row[aria-selected="true"]{border-color:#d64a62;background:#34222c}
+.g45 .g45-avatar{border-radius:50%;border:1px solid #85515e;background:#562534;flex-shrink:0}
+.g45 .g45-perms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.g45 .g45-permission{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid #3e454f;border-radius:10px;background:#1b2027;min-height:47px}
+.g45 .g45-permission input[type="checkbox"]{accent-color:#d22b47;width:17px;height:17px}
+.g45 .g45-btn,.g45 button{min-height:38px}
+.g45 :is(button,input,select):focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:950px){.g45 .g45-user-layout{grid-template-columns:1fr}.g45 .g45-perms{grid-template-columns:1fr}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_23_SPRAVA_UZIVATELU -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_24_SUPERADMIN -->
+<style id="perfect-v50-design-24">
+/* PERFECT V50 | Modul 24 SUPERADMIN | Pouze prezentační vrstva */
+/* Superadmin = vlastní identita Graphite; nezveřejňuje skryté prvky. */
+.g45 .g45-top{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.g45 .g45-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:11px}
+.g45 .g45-metric{background:linear-gradient(135deg,#23242d,#16171c);border:1px solid #4a424f;border-radius:13px;padding:17px}
+.g45 .g45-metric strong,.g45 .g45-metric b{color:#fff;font-size:22px;font-weight:950;font-variant-numeric:tabular-nums}
+.g45 .g45-activity-layout{display:grid;gap:15px}
+.g45 .g45-filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.g45 .g45-filters :is(input,select){background:#1d2028;border:1px solid #4e5561;border-radius:9px;min-height:43px;color:#fff;color-scheme:dark}
+.g45 .g45-table-wrap{max-width:100%;overflow-x:auto;border:1px solid #3d4450;border-radius:12px}
+.g45 .g45-table-wrap table{min-width:730px;width:100%;border-collapse:separate;border-spacing:0}
+.g45 .g45-table-wrap th{background:#242933;color:#b9c3d1;padding:11px 13px;text-transform:uppercase;font-size:11px}
+.g45 .g45-table-wrap td{padding:11px;border-bottom:1px solid #303740}
+.g45 .g45-tag{border-radius:100px;padding:4px 8px}
+@media(max-width:650px){.g45 .g45-filters{display:grid;grid-template-columns:1fr 1fr}.g45 .g45-filters>*{min-width:0}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_24_SUPERADMIN -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_25_MUJ_PROFIL -->
+<style id="perfect-v50-design-25">
+/* PERFECT V50 | Modul 25 MUJ_PROFIL | Pouze prezentační vrstva */
+/* Můj profil - ponechat skutečné osobní statistiky a směnář. */
+.perfect-profile-dialog{background:linear-gradient(155deg,#1d2028,#12151a);border:1px solid #4a4e57;border-radius:21px;box-shadow:0 30px 90px #000b;overflow:auto;max-height:min(91vh,940px)}
+.perfect-profile-dialog .pp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.perfect-profile-dialog .pp-panel{padding-top:14px}
+.perfect-profile-dialog .pp-panel[hidden]{display:none!important}
+.perfect-profile-dialog label{color:#d4d8e0;font-weight:700}
+.perfect-profile-dialog :is(input,select,textarea){min-height:42px;border:1px solid #525964;border-radius:9px;background:#1e222a;color:#fff}
+.perfect-profile-dialog .roster26-grid{min-width:0;gap:6px}
+.perfect-profile-dialog .roster26-day{border-radius:9px;border:1px solid #454a54;background:#1b2028}
+.perfect-profile-dialog .roster26-day.worked{border-color:#368d65;box-shadow:inset 0 0 0 1px #53b586}
+.perfect-profile-dialog [data-pp-panel="finance"] .pp-card{border-color:#6d5b3c;background:linear-gradient(145deg,#352918,#211d19)}
+.perfect-profile-dialog [data-pp-panel="finance"] .pp-card strong{color:#ffda8a}
+.perfect-profile-dialog .pp-empty{padding:15px;background:#29252b;border-radius:12px;color:#ccd1d9}
+@media(max-width:640px){.perfect-profile-dialog{max-height:100dvh;border-radius:0;width:100%}.perfect-profile-dialog .roster26-day{min-height:71px;padding:6px 3px}.perfect-profile-dialog .roster26-grid{gap:3px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_25_MUJ_PROFIL -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_26_KONTROLA_DUPLICIT -->
+<style id="perfect-v50-design-26">
+/* PERFECT V50 | Modul 26 KONTROLA_DUPLICIT | Pouze prezentační vrstva */
+/* Není přidáno žádné automatické slučování: jen sjednocení vzhledu dialogu. */
+#perfectDuplicates38 .modal,#perfectDuplicates38.modal{border:1px solid #5b4650;border-radius:19px;background:linear-gradient(150deg,#20232a,#12151b);max-width:min(900px,96vw);box-shadow:0 26px 80px #000c}
+#perfectDuplicates38 .modal-head{padding-bottom:14px;border-bottom:1px solid #424954;display:flex;gap:15px;justify-content:space-between;align-items:center}
+#perfectDuplicates38 .section{background:#1d2229;border:1px solid #3e454f;border-radius:13px;padding:15px}
+#perfectDuplicates38 .notice{background:#372831;border:1px solid #70404d;color:#f1ced3;padding:11px;border-radius:10px}
+#perfectDuplicates38 :is(input,textarea,select){min-height:43px;color:#fff;background:#1c2028;border:1px solid #4c5460;border-radius:9px}
+#perfectDuplicates38 .form-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;border-top:1px solid #404653;padding-top:14px}
+#perfectDuplicates38 .btn:not(.secondary){background:#c02642;border:1px solid #ed5069;color:white}
+#perfectDuplicatesBanner38{border:1px solid #7d654d;border-radius:11px;background:#30271e;color:#ffddb4;padding:10px 14px}
+#perfectDuplicates38 :is(input,select,button):focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:620px){#perfectDuplicates38 .form-actions button{flex:1;min-height:44px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_26_KONTROLA_DUPLICIT -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_27_KARTY_ZAKAZNIKA_A_VOZIDLA -->
+<style id="perfect-v50-design-27">
+/* PERFECT V50 | Modul 27 KARTY_ZAKAZNIKA_A_VOZIDLA | Pouze prezentační vrstva */
+/* Korunky jsou vypočtené z DB, nejsou zde přiřazované CSS. */
+#customerCardOverlay .modal{background:linear-gradient(154deg,#1e222b,#13161d);border:1px solid #50525e;border-radius:20px;box-shadow:0 27px 80px #000c;max-width:min(990px,96vw)}
+#customerCardOverlay .customer-profile-hero{padding:12px 0;min-width:0}
+#customerCardOverlay .profile-name{color:#fff;font-size:clamp(21px,2.5vw,29px);font-weight:950;letter-spacing:-.5px}
+#customerCardOverlay .p50-modal-identity{gap:14px;align-items:center}
+#customerCardOverlay .p50-avatar-wrap{padding-top:13px}
+#customerCardOverlay .p50-modal-identity .p50-avatar{width:68px;height:68px;border:2px solid #ae5766;box-shadow:0 0 0 4px #df33451f}
+#customerCardOverlay .p50-crowns{top:-9px}
+#customerCardOverlay .customer-meta{display:flex;flex-wrap:wrap;gap:8px}
+#customerCardOverlay .customer-meta span{border:1px solid #484f5a;border-radius:99px;background:#222832;padding:6px 10px}
+#customerCardOverlay .profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+#customerCardOverlay .profile-stat{border:1px solid #414954;border-radius:12px;background:#21252e;padding:13px}
+#customerCardOverlay .modal .section{border:1px solid #3e4551;border-radius:14px;background:#1b2028;padding:13px}
+#customerCardOverlay .modal .service{display:flex;justify-content:space-between;gap:10px;padding:11px 7px;border-bottom:1px solid #303944}
+#app .vehicle-brand-cell img,#app .vehicle-brand-logo,.overlay .vehicle-brand-logo{display:inline-block;width:47px;max-height:43px;object-fit:contain;vertical-align:middle}
+#app .vehicle-brand-cell{display:inline-flex;align-items:center;gap:12px}
+@media(max-width:640px){#customerCardOverlay .modal{max-width:100%;border-radius:12px}#customerCardOverlay .profile-grid{grid-template-columns:1fr 1fr}#customerCardOverlay .customer-meta{gap:5px}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_27_KARTY_ZAKAZNIKA_A_VOZIDLA -->
+
+<!-- BEGIN PERFECT_V50_DESIGN_28_SCHVALENE_FORMULARE -->
+<style id="perfect-v50-design-28">
+/* PERFECT V50 | Modul 28 SCHVALENE_FORMULARE | Pouze prezentační vrstva */
+/* Formulář nové/upravené zakázky i vystavení poukazu jsou schválené. */
+/* Bez překreslení komponent: jen dostupnost na telefonu, zachování manuálního přepisu částek. */
+.overlay .modal .form-grid{min-width:0}
+.overlay .modal .form-grid :is(input,select,textarea){max-width:100%;min-width:0}
+.overlay .modal :is(input,select,textarea):focus-visible{outline:2px solid #ee5269;outline-offset:2px}
+.overlay .modal .form-actions{display:flex;align-items:center;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.overlay .modal .form-actions button{min-height:42px}
+.overlay .modal .form-grid input[type="number"]{font-variant-numeric:tabular-nums}
+.overlay .modal .form-grid label{min-width:0}
+@media(max-width:720px){.overlay .modal .form-grid{grid-template-columns:1fr!important;gap:10px}.overlay .modal .form-actions button{flex:1;min-height:47px}.overlay .modal{max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto}}
+</style>
+
+<!-- END PERFECT_V50_DESIGN_28_SCHVALENE_FORMULARE -->
