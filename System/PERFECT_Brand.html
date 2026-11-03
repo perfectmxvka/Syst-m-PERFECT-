@@ -1,0 +1,30 @@
+<script>
+(function(){
+ 'use strict';
+ const OFFICIAL='https://res.cloudinary.com/ecxcwvyr/image/upload/v1792400548/Leskl%C3%A9_logo_Automy%C4%8Dka_Perfect.png';
+ const BRAND_IMAGES='.pd-brand-header,.pd-brand-side,.pd-auth-logo,.v50-header-brand img,.v50-mobile-logo img,img.v50-dialog-brand,img.pv51-dialog-logo,.b49 header.top .brand img,.layout>main>.top img[alt="Automyčka PERFECT"]';
+ let scheduled=false;
+ // Tento starý klíč obsahoval i původní čtvercové logo. Přihlášení neměníme.
+ try{localStorage.removeItem('perfect-brand37-20261017');}catch(e){}
+ function source(){const approved=window.PerfectApprovedBrand50;return approved&&typeof approved.horizontal==='string'&&/^data:image\/(png|jpeg|webp);base64,/.test(approved.horizontal)?approved.horizontal:OFFICIAL;}
+ function paint(img,logo){if(img.getAttribute('src')!==logo)img.setAttribute('src',logo);if(img.hasAttribute('srcset'))img.removeAttribute('srcset');if(img.getAttribute('alt')!=='Automyčka PERFECT')img.setAttribute('alt','Automyčka PERFECT');img.style.setProperty('object-fit','contain');}
+ function apply(){
+  const logo=source(),old=window.PerfectDesignAssets||{};
+  if(old.horizontal!==logo||old.stacked!==logo)window.PerfectDesignAssets=Object.assign({},old,{horizontal:logo,stacked:logo});
+  document.querySelectorAll('[data-perfect-brand37]').forEach(el=>{
+   let img=el.querySelector('img');
+   if(!img||el.children.length!==1||el.firstElementChild!==img){img=document.createElement('img');el.replaceChildren(img);}
+   const variant=el.getAttribute('data-perfect-brand37');img.className=variant==='horizontal'?'pd-brand-header':el.closest('.auth-brand')?'pd-auth-logo':'pd-brand-side';paint(img,logo);
+  });
+  document.querySelectorAll(BRAND_IMAGES).forEach(img=>paint(img,logo));
+ }
+ function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply();});}
+ function start(){apply();}
+ window.PerfectBrand37={start,apply};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+ new MutationObserver(records=>{
+  if(records.some(r=>r.type==='childList'||r.target?.matches?.(BRAND_IMAGES)||r.target?.closest?.('[data-perfect-brand37]')))schedule();
+ }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','srcset']});
+ // Favicon, mobilní ikony, loga automobilek a profilové fotografie se nevybírají.
+})();
+</script>

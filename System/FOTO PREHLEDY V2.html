@@ -1,0 +1,93 @@
+/* PERFECT FOTOGRAFIE V2 — profilové obrázky v seznamech.
+   Samostatná klientská vrstva, nesahá do databáze ani do log automobilek. */
+(function(){
+  'use strict';
+  if(window.PerfectPhotoListsV2)return;
+  const cache=new Map(),pending=new Set(),failed=new Set();
+  const queue={customer:new Set(),vehicle:new Set()};
+  let busy=false,scheduled=false;
+  const escId=s=>String(s||'').trim();
+  function request(kind,ids){
+    return new Promise((resolve,reject)=>{
+      if(typeof api!=='function')return reject(new Error('Chybí propojení Apps Script API.'));
+      api('perfectMediaGetProfileBatch',[{kind,ids}],resolve,reject);
+    });
+  }
+  function paint(kind,id){
+    const key=kind+':'+id,src=cache.get(key);
+    if(!src)return;
+    document.querySelectorAll('[data-perfect-photo-key]').forEach(el=>{
+      if(el.getAttribute('data-perfect-photo-key')!==key)return;
+      let img=el.querySelector('img[data-perfect-photo-image]');
+      if(!img){img=document.createElement('img');img.setAttribute('data-perfect-photo-image','');img.alt=kind==='vehicle'?'Fotografie vozidla':'Fotografie zákazníka';img.loading='lazy';el.appendChild(img);}
+      if(img.src!==src)img.src=src;
+    });
+  }
+  function collect(){
+    // Používá již existující tlačítka "Otevřít kartu" / "Detail vozu".
+    document.querySelectorAll('button[data-open-customer],button[data-open-vehicle]').forEach(btn=>{
+      const kind=btn.hasAttribute('data-open-customer')?'customer':'vehicle';
+      const id=escId(btn.getAttribute(kind==='customer'?'data-open-customer':'data-open-vehicle'));
+      const row=btn.closest('tr');
+      if(!row||!id||!/^[a-zA-Z0-9_-]{1,100}$/.test(id))return;
+      const td=row.querySelector('td');
+      if(!td)return;
+      const key=kind+':'+id;
+      let holder=td.querySelector('[data-perfect-photo-key]');
+      if(!holder){
+        holder=document.createElement('span');
+        holder.setAttribute('data-perfect-photo-key',key);
+        holder.className='perfect-photo-list-avatar';
+        holder.title=kind==='customer'?'Profil zákazníka':'Fotografie vozidla';
+        // Přidat vedle stávajícího obsahu, neodstraňovat logo automobilky.
+        td.insertBefore(holder,td.firstChild);
+      }
+      if(cache.has(key))paint(kind,id);
+      else if(!pending.has(key)&&!failed.has(key))queue[kind].add(id);
+    });
+    schedule();
+  }
+  function schedule(){
+    if(scheduled||busy||(!queue.customer.size&&!queue.vehicle.size))return;
+    scheduled=true;
+    setTimeout(flush,120);
+  }
+  async function flush(){
+    scheduled=false;
+    if(busy)return;
+    const kind=queue.customer.size?'customer':'vehicle';
+    if(!queue[kind].size)return;
+    const ids=Array.from(queue[kind]).slice(0,10);
+    ids.forEach(id=>{queue[kind].delete(id);pending.add(kind+':'+id);});
+    busy=true;
+    try{
+      const response=await request(kind,ids);
+      if(!response||response.success!==true)throw new Error('Načítání fotografií se nezdařilo.');
+      ids.forEach(id=>{
+        const src=response.photos&&response.photos[id];
+        if(typeof src==='string'&&/^data:image\/(jpeg|png|webp);base64,/i.test(src)){
+          cache.set(kind+':'+id,src);
+          paint(kind,id);
+        }else failed.add(kind+':'+id);
+      });
+    }catch(err){
+      console.warn('[PERFECT FOTO PŘEHLEDY] '+(err.message||err));
+      ids.forEach(id=>failed.add(kind+':'+id));
+    }finally{
+      ids.forEach(id=>pending.delete(kind+':'+id));
+      busy=false;schedule();
+    }
+  }
+  const style=document.createElement('style');
+  style.textContent='.perfect-photo-list-avatar{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:38px;height:38px;min-width:38px;margin-right:10px;border:1px solid #3d3d42;border-radius:9px;background:#25252b;overflow:hidden}.perfect-photo-list-avatar img{width:100%;height:100%;object-fit:cover}.perfect-photo-list-avatar:empty:before{content:"";width:13px;height:13px;border-radius:50%;background:#55545b;opacity:.55}';
+  document.head.appendChild(style);
+  let timer=null;
+  const observer=new MutationObserver(()=>{if(timer)return;timer=setTimeout(()=>{timer=null;collect()},150)});
+  observer.observe(document.body,{childList:true,subtree:true});
+  window.PerfectPhotoListsV2={
+    refresh:collect,
+    invalidate:function(kind,id){const key=kind+':'+id;cache.delete(key);failed.delete(key);queue[kind]&&queue[kind].add(id);schedule();},
+    clear:function(){cache.clear();failed.clear();pending.clear();queue.customer.clear();queue.vehicle.clear();}
+  };
+  collect();
+})();
