@@ -1,4 +1,4 @@
-import {readFile} from 'node:fs/promises';
+import {databaseTls} from './database-tls.mjs';
 import {PostgresDatabase} from './postgres-db.mjs';
 
 export async function openDatabase(env=process.env){
@@ -10,11 +10,11 @@ export async function openDatabase(env=process.env){
   if(!parsed.hostname||!parsed.username||parsed.pathname.length<2)throw Error('PostgreSQL URI musí obsahovat hostitele, uživatele a databázi.');
   const local=['localhost','127.0.0.1','[::1]'].includes(parsed.hostname);
   if(env.PG_LOCAL_TEST==='true'&&!local)throw Error('PG_LOCAL_TEST je povolený pouze pro lokální testovací databázi.');
-  const ca=env.SUPABASE_CA_CERT_PATH?await readFile(env.SUPABASE_CA_CERT_PATH,'utf8'):undefined;
+  const ssl=await databaseTls(parsed.hostname,env);
   const {Pool}=await import('pg');
   // Parse connection fields explicitly: URI query parameters must never override
   // the target host or disable TLS / certificate verification.
-  const pool=new Pool({host:parsed.hostname.replace(/^\[|\]$/g,''),port:Number(parsed.port||5432),user:decodeURIComponent(parsed.username),password:decodeURIComponent(parsed.password),database:decodeURIComponent(parsed.pathname.slice(1)),application_name:'perfect',max:5,connectionTimeoutMillis:15000,ssl:env.PG_LOCAL_TEST==='true'?false:{rejectUnauthorized:true,...(ca?{ca}:{})}});
+  const pool=new Pool({host:parsed.hostname.replace(/^\[|\]$/g,''),port:Number(parsed.port||5432),user:decodeURIComponent(parsed.username),password:decodeURIComponent(parsed.password),database:decodeURIComponent(parsed.pathname.slice(1)),application_name:'perfect',max:5,connectionTimeoutMillis:15000,ssl});
   pool.on('error',error=>console.error('PostgreSQL idle connection error:',error.code||error.name));
   const db=new PostgresDatabase(pool);
   try{await db.connect();}catch(error){await db.close();throw error;}

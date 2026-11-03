@@ -33,9 +33,13 @@ pro tento import ani pro nasazení popsané zde.
    Při vypnutých oznámeních nastav `PUSH_ENABLED=false`. Pro zapnutá oznámení
    server zachová importované preference a vytvoří klíče, pokud nejsou nastavené.
 
-TLS ověřování je povinné. Pokud systém nedůvěřuje certifikátu projektu, stáhni
-certifikát CA z nastavení SSL daného projektu a nastav `SUPABASE_CA_CERT_PATH`
-na jeho cestu v serveru. Nevypínej ověřování certifikátu.
+TLS ověřování je povinné. Pro hostitele `*.supabase.com` a `*.supabase.co`
+backend automaticky přidává původní veřejný certifikát Supabase Root 2021 CA
+ze souboru `certs/supabase-root-2021.crt` k systémovým důvěryhodným certifikátům.
+Ruční Secret File ani `SUPABASE_CA_CERT_PATH` pro Supabase nejsou potřeba;
+případná starší hodnota této proměnné se pro tyto hostitele nepoužije.
+Pro jiné PostgreSQL hostitele lze vlastní CA zadat přes `SUPABASE_CA_CERT_PATH`.
+Ověřování certifikátu ani názvu hostitele se nevypíná.
 
 ## Render / běžné spuštění
 
