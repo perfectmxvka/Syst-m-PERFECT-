@@ -1,0 +1,27 @@
+{
+  "name": "perfect-mongo-103",
+  "version": "1.10.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "import": "node --env-file-if-exists=.env migrate.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:integration": "node test/integration110.mjs",
+    "init:clean": "node --env-file-if-exists=.env seed-clean.mjs"
+  },
+  "dependencies": {
+    "@tesseract.js-data/ces": "1.0.0",
+    "@tesseract.js-data/eng": "1.0.0",
+    "cloudinary": "^2.7.0",
+    "mongodb": "^6.21.0",
+    "tesseract.js": "6.0.1",
+    "web-push": "3.6.7"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "10.2.3"
+  }
+}
