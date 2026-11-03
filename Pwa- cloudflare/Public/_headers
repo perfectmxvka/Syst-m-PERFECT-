@@ -1,0 +1,19 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: same-origin
+  X-Robots-Tag: noindex, nofollow
+/
+  Cache-Control: no-store
+/index.html
+  Cache-Control: no-store
+/host.js
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-store
+/manifest.webmanifest
+  Cache-Control: no-cache
+/icon-192.png
+  Cache-Control: public, max-age=86400
+/icon-512.png
+  Cache-Control: public, max-age=86400
