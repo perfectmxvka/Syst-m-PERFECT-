@@ -4,7 +4,7 @@ function GMAIL_57_02_SPUSTIT_OD_17_10(){return gmailEditor52_(function(){
  gmailCheckProduction52_();gmailValidateDependenciesV23_();
  // Reset kurzoru je povolen jen pod stejným zámkem jako běžící import.
  const lock=LockService.getUserLock();if(!lock.tryLock(1000))throw Error('Import právě běží. Spusť nastavení po jeho dokončení.');
- try{PropertiesService.getUserProperties().setProperty('PERFECT_GMAIL_V57_HISTORY',JSON.stringify({day:PERFECT_GMAIL_CONFIG.START_DATE,offset:0}));}
+ try{PropertiesService.getUserProperties().setProperty('PERFECT_GMAIL_V57_HISTORY',JSON.stringify({day:gmailStartDate103_(),offset:0}));}
  finally{lock.releaseLock();}
  perfect40Original_gmailStartAutomaticImport_();
  const result=perfect40Original_gmailRunAutomaticImport_();Logger.log(JSON.stringify(result,null,2));return result;
@@ -120,7 +120,7 @@ function perfect40Original_gmailStartAutomaticImport_() {
   gmailStopAutomaticImport();
   ScriptApp.newTrigger(PERFECT_GMAIL_CONFIG.HANDLER_FUNCTION)
     .timeBased().everyMinutes(PERFECT_GMAIL_CONFIG.CHECK_INTERVAL_MINUTES).create();
-  Logger.log('Aktivní Gmail import PERFECT V57 — každou minutu; historie od 17. 10. 2026.');
+  Logger.log('Aktivní Gmail import PERFECT V57 — každou minutu; historie podle nastaveného počátečního dne.');
   return 'Aktivováno';
 }
 function perfect40Original_gmailStopAutomaticImport_() {
@@ -157,7 +157,7 @@ function gmailFindUnimportedMessages_(limit,options) {
  const started=Date.now(),liveBudget=Math.max(1,Math.floor(max/3)),retryBudget=Math.max(1,Math.floor(max/6));
  function add(m){
   const id=String(m.getId()),day=Utilities.formatDate(m.getDate(),PERFECT_GMAIL_CONFIG.TIMEZONE,'yyyy-MM-dd');
-  if(seen[id]||existing[id]||m.getDate()>now||day<PERFECT_GMAIL_CONFIG.START_DATE||!gmailIsReservationMessage_(m))return false;
+  if(seen[id]||existing[id]||m.getDate()>now||day<gmailStartDate103_()||!gmailIsReservationMessage_(m))return false;
   if(!options.ignoreRetry&&retry[id]&&retry[id].until>Date.now())return false;
   seen[id]=true;found.push(m);return true;
  }
@@ -165,7 +165,7 @@ function gmailFindUnimportedMessages_(limit,options) {
  // Čerstvé zprávy se procházejí při každém běhu, i během dohánění historie.
  const liveDays=[today,gmailNextDay57_(today,-1)];
  for(const day of liveDays){
-  if(day<PERFECT_GMAIL_CONFIG.START_DATE||found.length>=liveBudget)continue;
+  if(day<gmailStartDate103_()||found.length>=liveBudget)continue;
   for(let page=0;page<PERFECT_GMAIL_CONFIG.SEARCH_MAX_PAGES&&found.length<liveBudget;page++){
    const threads=GmailApp.search(query(day),page*PERFECT_GMAIL_CONFIG.SEARCH_PAGE_SIZE,PERFECT_GMAIL_CONFIG.SEARCH_PAGE_SIZE);
    for(const thread of threads){for(const m of thread.getMessages()){if(Utilities.formatDate(m.getDate(),PERFECT_GMAIL_CONFIG.TIMEZONE,'yyyy-MM-dd')===day)add(m);if(found.length>=liveBudget)break;}if(found.length>=liveBudget)break;}
@@ -205,7 +205,7 @@ function gmailFindUnimportedMessages_(limit,options) {
 function gmailNextDay57_(day,offset){return Utilities.formatDate(new Date(new Date(day+'T00:00:00Z').getTime()+offset*86400000),'UTC','yyyy-MM-dd');}
 function gmailHistory57_(){
  let value;try{value=JSON.parse(PropertiesService.getUserProperties().getProperty('PERFECT_GMAIL_V57_HISTORY')||'null');}catch(e){}
- if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value.day)||value.day<PERFECT_GMAIL_CONFIG.START_DATE||!Number.isInteger(value.offset)||value.offset<0)return {day:PERFECT_GMAIL_CONFIG.START_DATE,offset:0};
+ if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value.day)||value.day<gmailStartDate103_()||!Number.isInteger(value.offset)||value.offset<0)return {day:gmailStartDate103_(),offset:0};
  return value;
 }
 
@@ -348,7 +348,7 @@ function perfect40Original_gmailAutomaticImportStatus_() {
   const triggers = ScriptApp.getProjectTriggers().filter(t=>gmailKnownHandler52_(t.getHandlerFunction()));
   const status = {active:triggers.length>0, triggerCount:triggers.length, handlers:triggers.map(t=>t.getHandlerFunction()),
     intervalMinutes:PERFECT_GMAIL_CONFIG.CHECK_INTERVAL_MINUTES,
-    startDate:PERFECT_GMAIL_CONFIG.START_DATE,history:gmailHistory57_()};
+    startDate:gmailStartDate103_(),history:gmailHistory57_()};
   const last=PropertiesService.getUserProperties().getProperty('PERFECT_GMAIL_V24_LAST');
   if(last)try{status.lastRun=JSON.parse(last);}catch(e){}
   Logger.log(JSON.stringify(status,null,2));
@@ -516,4 +516,11 @@ function perfect40Original_perfectGmailDiagnostikaV24_(){
   const last=PropertiesService.getUserProperties().getProperty('PERFECT_GMAIL_V24_LAST');
   if(last)try{out.lastRun=JSON.parse(last);}catch(e){}
   Logger.log(JSON.stringify(out,null,2));return out;
+}
+
+/** Počáteční den doručení zpráv (Europe/Prague), ne datum rezervace. */
+function gmailStartDate103_(){
+ const day=PropertiesService.getScriptProperties().getProperty('PERFECT103_GMAIL_START_DATE')||PERFECT_GMAIL_CONFIG.START_DATE;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||new Date(day+'T00:00:00Z').toISOString().slice(0,10)!==day)throw Error('Neplatný počáteční den Gmail importu.');
+ return day;
 }
