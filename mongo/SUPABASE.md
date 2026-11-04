@@ -100,3 +100,24 @@ schéma `perfect_import`. Pro opakování vytvoř nový prázdný kontejner.
 Lokální testování používá `PG_LOCAL_TEST=true` jen pro localhost bez TLS;
 v produkci tuto proměnnou nepoužívej. Živé procesy po obnovení cloudového
 prostředí nepřetrvávají, test si svůj aplikační proces spouští a ukončuje sám.
+
+## Karty, oznámení a fotografický příjem (oprava 113)
+
+- Karty zákazníků i vozidel zachovávají příznak načtení dat ve všech vrstvách
+  otevírání. DOM test otevírá obě karty včetně editace na skutečném HTML aplikace.
+- Na Renderu nastav `PUSH_ENABLED=true`. Adresa pro VAPID se nyní přebírá také
+  z `RENDER_EXTERNAL_URL`. Klíče jsou uložené v databázi a přežijí restart.
+  Zařízení s již uděleným souhlasem obnoví chybějící odběr; při změně klíčů se
+  starý odběr nahradí. Pokud prohlížeč požaduje gesto, použij v aplikaci
+  **Moje oznámení → Zapnout na tomto zařízení → Test oznámení**.
+  Na iPhonu jsou webová push oznámení určena pro aplikaci přidanou na plochu
+  (iOS 16.4+). Úspěch serverového odeslání ještě nepotvrzuje zobrazení na telefonu.
+  V bezplatném Renderu se služba může uspávat; toto nastavení kód nemění.
+- Horní tlačítko i dolní mobilní panel přímo požádají o nativní zachycení obrazu
+  ze zadního fotoaparátu. Konkrétní nabídku fotoaparát/galerie řídí prohlížeč.
+  Po výběru se zobrazí fotografie a upravitelná pole, volitelný výřez a potvrzení.
+  OCR probíhá lokálně, používá upravený kontrast a druhou segmentaci při slabém
+  výsledku. Slabě rozpoznané řádky se nepřebírají automaticky. Datum bez roku
+  používá viditelně zvolený rok, čas `13h` se rozpozná jako `13:00`.
+  Nejde o nový model rozpoznávání rukopisu: těžko čitelný rukopis může stále
+  vyžadovat ruční vyplnění. Bez kontroly nelze pokračovat do formuláře objednávky.

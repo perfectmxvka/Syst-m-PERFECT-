@@ -18,15 +18,54 @@ function perfectPhoneParse_(value){
 }
 
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-export function parseIntake(text){
- const lines=String(text).replace(/\r/g,'').split('\n').map(s=>s.trim()).filter(Boolean),out={};
- const labels=[['DATUM_OBJEDNANI',/^(?:datum(?:\s+(?:prijezdu|objednavky))?)\s*[:_\-]?\s*/],['CAS_PRIJEZDU',/^(?:cas(?:\s+prijezdu)?)\s*[:_\-]?\s*/],['JMENO_PRIJMENI',/^(?:jmeno(?:\s+a\s+prijmeni|\s+zakaznika)?|zakaznik)\s*[:_\-]?\s*/],['TELEFON',/^(?:telefon(?:ni\s+cislo)?|kontakt|tel\.)\s*[:_\-]?\s*/],['VOZIDLO',/^(?:vozidlo|typ\s+vozu|vuz)\s*[:_\-]?\s*/],['SPZ',/^(?:spz|registracni\s+znacka)\s*[:_\-]?\s*/],['MYCI_PROGRAM',/^(?:myci\s+program|program|vyber\s+sluzby|sluzba)\s*[:_\-]?\s*/],['CENA_CELKEM',/^(?:celkova\s+cena|cena\s+celkem|celkem|cena(?!\s+(?:programu|doplnku)))\s*[:_\-]?\s*/],['EMAIL',/^(?:e-?mail)\s*[:_\-]?\s*/],['PRACOVNIK',/^(?:pracovnik|zamestnanec|car\s+lazebnik)\s*[:_\-]?\s*/],['POZNAMKY',/^(?:poznamky?|zprava)\s*[:_\-]?\s*/],['DOPLNKY',/^(?:doplnkove\s+sluzby|doplnky)\s*[:_\-]?\s*/],['FIRMA',/^firma\s*[:_\-]?\s*/],['DARKOVY_POUKAZ',/^(?:darkovy\s+poukaz|kod\s+poukazu)\s*[:_\-]?\s*/]];
- for(let i=0;i<lines.length;i++){const n=norm(lines[i]);for(const [key,re] of labels){const match=n.match(re);if(!match)continue;let value=lines[i].slice(match[0].length).replace(/^[:_\s-]+/,'').trim();if(!value&&lines[i+1]&&!labels.some(([,rx])=>rx.test(norm(lines[i+1]))))value=lines[++i];if(value)out[key]=value;break;}}
- if(out.DATUM_OBJEDNANI){let m=out.DATUM_OBJEDNANI.match(/(\d{1,2})[.\/]\s*(\d{1,2})[.\/]\s*(20\d{2})/);const iso=m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:out.DATUM_OBJEDNANI.match(/20\d{2}-\d{2}-\d{2}/)?.[0];if(iso&&!isNaN(Date.parse(iso))&&new Date(iso).toISOString().slice(0,10)===iso)out.DATUM_OBJEDNANI=iso;else delete out.DATUM_OBJEDNANI;}
- if(out.CAS_PRIJEZDU){const m=out.CAS_PRIJEZDU.match(/\b(\d{1,2})[:.](\d{2})\b/);if(m&&+m[1]>=8&&+m[1]<=19&&['00','30'].includes(m[2]))out.CAS_PRIJEZDU=m[1].padStart(2,'0')+':'+m[2];else delete out.CAS_PRIJEZDU;}
+const labels=[
+ ['DATUM_OBJEDNANI','datum(?:\\s+(?:prijezdu|objednavky))?'],
+ ['CAS_PRIJEZDU','cas(?:\\s+prijezdu)?|prijezd'],
+ ['JMENO_PRIJMENI','jmeno(?:\\s+a\\s+prijmeni|\\s+zakaznika)?|zakaznik'],
+ ['TELEFON','telefon(?:ni\\s+cislo)?|kontakt|tel[.]?'],
+ ['VOZIDLO','vozidlo|typ\\s+vozu|vuz'],['SPZ','spz|registracni\\s+znacka'],
+ ['DOPLNKY','sluzb[ay]\\s+navic|doplnkove\\s+sluzby|doplnky'],
+ ['MYCI_PROGRAM','myci\\s+program|program|vyber\\s+sluzby|sluzba'],
+ ['CENA_CELKEM','celkova\\s+cena|cena\\s+celkem|celkem|cena(?!\\s+(?:programu|doplnku))'],
+ ['EMAIL','e-?mail'],['PRACOVNIK','pracovnik|zamestnanec|car\\s+lazebnik'],
+ ['POZNAMKY','poznamky?|zprava'],['FIRMA','firma'],['DARKOVY_POUKAZ','darkovy\\s+poukaz|kod\\s+poukazu'],
+ // Recognize but never import departure as arrival, nor prices of individual extras.
+ [null,'odjezd|cena\\s+(?:programu|doplnku)']
+].map(([key,source])=>[key,new RegExp('^(?:'+source+')(?:\\s*[:_–-]\\s*|\\s+|$)')]);
+export function parseIntake(text,{year}={}){
+ const lines=String(text).replace(/\r/g,'').split('\n').map(s=>s.trim()),out={};
+ for(let i=0;i<lines.length;i++){
+  const match=labels.map(([key,re])=>({key,match:norm(lines[i]).match(re)})).find(x=>x.match);
+  if(!match||!match.key)continue;
+  let value=lines[i].slice(match.match[0].length).trim();
+  if(!value&&lines[i+1]&&!labels.some(([,re])=>re.test(norm(lines[i+1]))))value=lines[++i].trim();
+  if(value&&!Object.hasOwn(out,match.key))out[match.key]=value;
+ }
+ if(out.DATUM_OBJEDNANI){
+  const raw=out.DATUM_OBJEDNANI;
+  let m=raw.match(/^(\d{1,2})[./]\s*(\d{1,2})[./]?\s*(20\d{2})?$/);
+  const y=m?.[3]||(Number.isInteger(year)?String(year):'');
+  const iso=m&&y?`${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:/^20\d{2}-\d{2}-\d{2}$/.test(raw)?raw:'';
+  if(iso&&!isNaN(Date.parse(iso))&&new Date(iso).toISOString().slice(0,10)===iso)out.DATUM_OBJEDNANI=iso;else delete out.DATUM_OBJEDNANI;
+ }
+ if(out.CAS_PRIJEZDU){const m=out.CAS_PRIJEZDU.match(/^(\d{1,2})(?:[:.]([0-5]\d)|\s*h(?:od)?[.]?)$/i);const minutes=m?.[2]||'00';if(m&&+m[1]>=8&&+m[1]<=19&&['00','30'].includes(minutes))out.CAS_PRIJEZDU=m[1].padStart(2,'0')+':'+minutes;else delete out.CAS_PRIJEZDU;}
  if(out.TELEFON){const phone=perfectPhoneParse_(out.TELEFON);if(phone)out.TELEFON=phone.country==='CZ'?phone.digits.slice(3):phone.formatted;else delete out.TELEFON;}
- if(out.CENA_CELKEM){const m=out.CENA_CELKEM.match(/\d[\d .,\u00a0]*/);if(m){let n=m[0].trim().replace(/\s/g,'');if(n.includes(','))n=n.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(?:\.\d{3})+$/.test(n))n=n.replace(/\./g,'');out.CENA_CELKEM=Number(n);if(!Number.isFinite(out.CENA_CELKEM))delete out.CENA_CELKEM;else out.CENA_PROGRAMU=out.CENA_CELKEM;}else delete out.CENA_CELKEM;}
+ if(out.CENA_CELKEM){
+  const m=out.CENA_CELKEM.match(/^(\d[\d .,\u00a0]*)(?:\s*(?:Kč|CZK|,-))?$/i);
+  if(m){let n=m[1].trim().replace(/\s/g,'');if(n.includes(','))n=n.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(?:\.\d{3})+$/.test(n))n=n.replace(/\./g,'');out.CENA_CELKEM=Number(n);if(!Number.isFinite(out.CENA_CELKEM)||out.CENA_CELKEM<0)delete out.CENA_CELKEM;else out.CENA_PROGRAMU=out.CENA_CELKEM;}else delete out.CENA_CELKEM;
+ }
  if(out.EMAIL&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(out.EMAIL))delete out.EMAIL;
- if(out.SPZ)out.SPZ=out.SPZ.toUpperCase().replace(/\s/g,'').replace(/^(.{3})(.+)$/,'$1 $2');
+ if(out.SPZ){const raw=out.SPZ.toUpperCase().replace(/\s/g,'');if(/^[A-Z0-9]{5,10}$/.test(raw)&&/\d/.test(raw))out.SPZ=raw.replace(/^(.{3})(.+)$/,'$1 $2');else delete out.SPZ;}
+ for(const key of ['JMENO_PRIJMENI','VOZIDLO','MYCI_PROGRAM'])if(out[key]&&(!/\p{L}{2}/u.test(out[key])||/[<>{}]/.test(out[key])))delete out[key];
  return out;
+}
+
+// Low-confidence handwriting must not silently become a customer or a phone.
+export function intakeFromOcr(data,options={}){
+ const lines=(data.blocks||[]).flatMap(b=>(b.paragraphs||[]).flatMap(p=>p.lines||[]));
+ const safeText=lines.length?lines.map(line=>{
+  const words=line.words||[],conf=words.length?Math.min(...words.map(w=>Number(w.confidence)||0)):Number(line.confidence)||0;
+  return conf>=65?line.text.trim():'';
+ }).join('\n'):Number(data.confidence)>=75?String(data.text||''):'';
+ return {draft:parseIntake(safeText,options),text:String(data.text||''),uncertain:!lines.length||safeText.trim()!==String(data.text||'').trim()};
 }

@@ -32,14 +32,14 @@ async function deliver106(){if(!push.enabled||delivering106)return;delivering106
 
 setInterval(deliver106,10000).unref();
 const publicFiles=new Map(['host.js','sw.js','manifest.webmanifest','favicon.ico','icon-192.png','icon-512.png','apple-touch-icon.png'].map(n=>['/'+n,path.join(root,'../pwa-cloudflare/public',n)]));
-publicFiles.set('/intake110.mjs',path.join(root,'../pwa-cloudflare/public/intake110.mjs'));
+for(const name of ['intake110.mjs','intake-review.mjs'])publicFiles.set('/'+name,path.join(root,'../pwa-cloudflare/public',name));
 for(const name of fs.readdirSync(path.join(root,'../pwa-cloudflare/public/ocr')))publicFiles.set('/ocr/'+name,path.join(root,'../pwa-cloudflare/public/ocr',name));
 const html=fs.readFileSync(path.join(root,'../system/Index.html'),'utf8').replace('<head>','<head><script src="/host.js"></script><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png">');
 const rates=new Map();function rate(ip,limit=120){const now=Date.now();let r=rates.get(ip);if(!r||r.until<now){r={until:now+60000,count:0};rates.set(ip,r);}if(rates.size>10000)for(const [k,v]of rates)if(v.until<now)rates.delete(k);return ++r.count<=limit;}
 const send=(res,status,value)=>{const body=Buffer.from(JSON.stringify(value)),zip=res.perfectGzip&&body.length>2048;res.writeHead(status,{'content-type':'application/json; charset=utf-8',...(zip?{'content-encoding':'gzip','vary':'Accept-Encoding'}:{})});res.end(zip?gzipSync(body):body);};
 const htmlGzip=gzipSync(html);
 const server=http.createServer(async(req,res)=>{res.perfectGzip=/\bgzip\b/.test(req.headers['accept-encoding']||'');res.setHeader('cache-control','no-store');res.setHeader('x-content-type-options','nosniff');res.setHeader('x-frame-options','DENY');res.setHeader('referrer-policy','same-origin');res.setHeader('x-robots-tag','noindex, nofollow');const pathname=new URL(req.url,origin).pathname;try{
- if(req.method==='GET'&&pathname==='/healthz')return send(res,200,{ok:true,build:'PERFECT-MERGED-2026-11-01'});
+ if(req.method==='GET'&&pathname==='/healthz')return send(res,200,{ok:true,build:'PERFECT-SUPABASE-2026-11-04-113'});
  if(req.method==='GET'&&pathname==='/push-config')return send(res,200,{enabled:push.enabled,publicKey:push.publicKey,reason:push.reason});
  if(req.method==='GET'&&(pathname==='/'||pathname==='/index.html')){res.setHeader('content-type','text/html; charset=utf-8');if(res.perfectGzip){res.setHeader('content-encoding','gzip');res.setHeader('vary','Accept-Encoding');}return res.end(res.perfectGzip?htmlGzip:html);}
  if(req.method==='GET'&&publicFiles.has(pathname)){const ext=path.extname(pathname);res.writeHead(200,{'content-type':{'.js':'text/javascript','.mjs':'text/javascript','.wasm':'application/wasm','.gz':'application/octet-stream','.txt':'text/plain','.png':'image/png','.ico':'image/x-icon','.webmanifest':'application/manifest+json'}[ext]});return fs.createReadStream(publicFiles.get(pathname)).pipe(res);}
@@ -48,12 +48,13 @@ const server=http.createServer(async(req,res)=>{res.perfectGzip=/\bgzip\b/.test(
  let envelope,data;try{envelope=JSON.parse(body);data=verifyEnvelope(envelope,process.env.PERFECT103_SYNC_SECRET);}catch{return send(res,403,{success:false,message:'Předání nebylo ověřeno.'});}
  const result=await serialized(()=>store.run(state=>{const key='PERFECT103_NONCE_'+envelope.nonce;if(state.properties[key])throw Error('Zpráva už byla přijata.');for(const k of Object.keys(state.properties))if(k.startsWith('PERFECT103_NONCE_')&&Number(state.properties[k])<Date.now()-300000)delete state.properties[k];const result=ingest(state,data);state.properties[key]=String(Date.now());return result;}));if(push.enabled&&result.accepted?.length){serialized(()=>store.run(state=>createRuntime(state).ctx.perfectRepairUsers_().filter(u=>u.active!==false&&u.role==='ADMINISTRATOR').map(u=>({id:u.id})))).then(async users=>{for(const u of users)await push.notify(u);}).catch(()=>console.error('perfect106.push event failed'));}return send(res,200,result);
  }
- if(req.method==='POST'&&['/subscribe','/unsubscribe','/push-test','/push-preferences'].includes(pathname)){
+ if(req.method==='POST'&&['/subscribe','/unsubscribe','/push-test','/push-preferences','/push-status'].includes(pathname)){
  if(!push.enabled)return send(res,503,{success:false,message:'Push není nastaven.'});
  if(req.headers.origin!==origin||!/^application\/json(?:;|$)/i.test(req.headers['content-type']||''))return send(res,403,{success:false});
  if(!rate(req.socket.remoteAddress,30))return send(res,429,{success:false});
  let raw='',size=0;for await(const part of req){size+=part.length;if(size>10000)return send(res,413,{success:false});raw+=part;}
  const p=JSON.parse(raw);let user;try{user=await serialized(()=>store.run(state=>createRuntime(state).ctx.perfectRepairRequireUser_(p.token)));}catch{return send(res,401,{success:false,message:'Přihlas se znovu.'});}
+ if(pathname==='/push-status')return send(res,200,{success:true,...await push.status(user)});
  if(pathname==='/push-preferences')return send(res,200,{success:true,preferences:await push.preferences(user,p.preferences)});
  if(pathname==='/subscribe')await push.subscribe(user,p.subscription);
  if(pathname==='/unsubscribe')await push.unsubscribe(user,String(p.endpoint));
