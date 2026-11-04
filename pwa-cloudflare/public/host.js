@@ -166,3 +166,23 @@ const observer=new MutationObserver(schedule);
 function start(){schedule();document.addEventListener('click',e=>{if(!e.target.closest('.perfect-corner-menu'))document.querySelectorAll('.perfect-corner-menu[open]').forEach(m=>m.open=false);});document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.perfect-corner-menu[open]').forEach(m=>{m.open=false;m.querySelector('summary').focus();});});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
+
+// A notification target survives login and works in an existing or newly opened PWA.
+(()=>{
+ let pending=location.hash,handling=false;
+ function accept(value){try{const url=new URL(value,location.origin);if(url.origin!==location.origin||url.pathname!=='/')return;pending=url.hash;run();}catch{}}
+ async function run(){
+  if(handling||!pending||!window.PerfectStorage62?.session.getItem('perfectAuthToken')||document.getElementById('authGate')?.style.display!=='none'||!window.perfectOwnDay114)return;
+  const match=/^#perfect-(order|day|month)=(.+)$/.exec(pending);if(!match){pending='';return;}
+  let value;try{value=decodeURIComponent(match[2]);}catch{pending='';return;}
+  handling=true;pending='';
+  try{
+   if(match[1]==='order'&&/^(?:N|OF|D)\d{4}-\d+$/.test(value)){window.perfectGo('orders');window.perfectOpenOrder114(value);}
+   else if(match[1]==='day'&&/^\d{4}-\d{2}-\d{2}$/.test(value)){window.perfectOpenMyProfile();const month=document.querySelector('.perfect-profile-dialog [data-roster-month]');if(month)month.value=value.slice(0,7);document.querySelector('.perfect-profile-dialog [data-pp-tab="roster"]')?.click();window.perfectOwnDay114(value);}
+   else if(match[1]==='month'&&/^\d{4}-\d{2}$/.test(value)){window.perfectOpenMyProfile();document.querySelector('.perfect-profile-dialog [data-pp-tab="finance"]')?.click();const input=document.querySelector('.perfect-profile-dialog [data-p101-month]');if(input){input.value=value;input.dispatchEvent(new Event('change',{bubbles:true}));}}
+   if(location.hash.startsWith('#perfect-'))history.replaceState(null,'',location.pathname+location.search);
+  }finally{handling=false;}
+ }
+ navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='PERFECT_OPEN')accept(event.data.url);});
+ addEventListener('hashchange',()=>accept(location.href));addEventListener('DOMContentLoaded',run);setInterval(run,1000);
+})();

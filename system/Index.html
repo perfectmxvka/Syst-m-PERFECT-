@@ -1278,14 +1278,32 @@ function phoneText(value){const p=perfectPhoneParse_(value);return p?p.formatted
 function shortDateToIso(dayMonth,year){const m=/^(\d{1,2})\.\s*(\d{1,2})\.?$/.exec(String(dayMonth).trim());if(!m||!/^\d{4}$/.test(String(year)))throw new Error('Datum zadej jako 23.1 a vyber rok.');const d=new Date(Number(year),Number(m[2])-1,Number(m[1]));if(d.getFullYear()!==Number(year)||d.getMonth()!==Number(m[2])-1||d.getDate()!==Number(m[1]))throw new Error('Toto datum neexistuje.');return String(year)+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}
 function setAuthBusy(busy,label){const btn=document.getElementById('authSubmit');btn.disabled=busy;btn.setAttribute('aria-busy',String(busy));btn.innerHTML=busy?'<span class="spinner" aria-hidden="true"></span>'+esc(label||'Přihlašuji…'):'PŘIHLÁSIT SE';document.getElementById('authForm').setAttribute('aria-busy',String(busy));}
 function showOrderForm(order=null,draft110=null){openPerfectOrderEditor(null,draft110);}
-function showOrderEditForm(id){if(/^D\d{4}-/.test(String(id))){PerfectDetail44.edit(String(id));return;}const order=state.orders.find(o=>String(o.ORDER_ID)===String(id));if(!order){alert('Objednávka nebyla nalezena. Obnov data.');return;}openPerfectOrderEditor(order);}
+window.perfectOpenOrder114=id=>showOrderDetails(id);
+window.perfectOwnDay114=function(date){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+ document.getElementById('perfectOwnDay114')?.remove();
+ const overlay=document.createElement('div');overlay.className='overlay';overlay.id='perfectOwnDay114';
+ overlay.innerHTML='<section class="modal" role="dialog" aria-modal="true" aria-label="Můj denní přehled"><div class="modal-head"><h2>Můj den · '+esc(dateText(date))+'</h2><button class="close" aria-label="Zavřít">×</button></div><div data-day-content role="status">Načítám denní přehled…</div></section>';
+ document.body.append(overlay);overlay.querySelector('.close').onclick=()=>overlay.remove();
+ const session=window.PerfectStorage62.session.getItem('perfectAuthToken');
+ api('perfectProfile54GetRoster',[{month:date.slice(0,7),date}],r=>{
+  if(!overlay.isConnected||session!==window.PerfectStorage62.session.getItem('perfectAuthToken')){overlay.remove();return;}
+  const target=overlay.querySelector('[data-day-content]'),detail=r.detail;if(!detail){target.textContent='Server neposlal denní přehled.';return;}
+  target.innerHTML=detail.shifts.map(s=>'<section class="section"><h3>'+esc(s.station)+' · '+(s.worked?'Potvrzená směna':'Směna zatím nepotvrzená')+'</h3><p>Součet přiřazených zakázek: <b>'+money(s.revenue)+'</b></p>'+(s.pay?'<p>Základ: '+money(s.pay.base)+'</p><p>Výkonový bonus: '+money(s.pay.performanceBonus)+'</p><p>Víkendový bonus: '+money(s.pay.weekendBonus)+'</p><p><b>'+(s.worked?'Výdělek':'Dosavadní odhad')+': '+money(s.pay.total)+'</b></p>':'<p>Odměna zatím není vyčíslena.</p>')+'</section>').join('')||'<p>Na tento den nemáš přiřazenou směnu.</p>';
+  target.insertAdjacentHTML('beforeend','<h3>Zakázky mé směny</h3>'+detail.orders.map(o=>'<div class="service"><span><b>'+esc(o.id)+'</b> · '+esc(o.time)+'<br>'+esc(o.vehicle)+' · '+esc(o.program)+'<br>'+esc(o.status)+'</span><b>'+money(o.share)+'</b></div>').join('')+'<p class="muted">Přehled zobrazuje aktuálně uložené údaje. Měsíční bonusy, zálohy a obědy najdeš v záložce Odměny.</p>');
+ },e=>{if(overlay.isConnected)overlay.querySelector('[data-day-content]').textContent=e.message||String(e);});
+};
+
+function showOrderEditForm(id,ready114=false){if(window.PerfectLazy110&&!ready114){PerfectLazy110.records(()=>showOrderEditForm(id,true));return;}if(/^D\d{4}-/.test(String(id))){PerfectDetail44.edit(String(id));return;}const order=state.orders.find(o=>String(o.ORDER_ID)===String(id));if(!order){alert('Objednávka nebyla nalezena. Obnov data.');return;}openPerfectOrderEditor(order);}
 function openPerfectOrderEditor(order,draft110=null){
  if(!(window.google&&google.script&&google.script.run)){alert('Formulář otevři přes nasazenou URL webu.');return;}
  if(document.getElementById('orderOverlay'))return;
  const editing=!!order,o=order?{...order}:{...(draft110||{})},d=editing||draft110?dateVal(o.DATUM_OBJEDNANI):new Date();
- let storedEnvelope=null;try{storedEnvelope=o.CENOVE_POLOZKY?JSON.parse(o.CENOVE_POLOZKY):null;}catch(e){alert('Původní cenový rozpis nelze přečíst. Objednávka nebyla změněna.');return;}
- const storedPricing=storedEnvelope&&storedEnvelope.legacyPricing===true?null:storedEnvelope;
- if(storedPricing&&(!storedPricing.program||!Array.isArray(storedPricing.addons))){alert('Původní cenový rozpis nemá očekávaný formát. Objednávka nebyla změněna.');return;}
+ let storedEnvelope=null,legacyPricing114=false;
+ try{storedEnvelope=o.CENOVE_POLOZKY?(typeof o.CENOVE_POLOZKY==='string'?JSON.parse(o.CENOVE_POLOZKY):o.CENOVE_POLOZKY):null;}catch(e){legacyPricing114=true;}
+ const validPricing114=storedEnvelope&&typeof storedEnvelope==='object'&&!Array.isArray(storedEnvelope)&&storedEnvelope.program&&typeof storedEnvelope.program==='object'&&Array.isArray(storedEnvelope.addons)&&storedEnvelope.addons.every(p=>p&&typeof p==='object');
+ const storedPricing=storedEnvelope?.legacyPricing===true||!validPricing114?null:storedEnvelope;
+ legacyPricing114=legacyPricing114||!!(o.CENOVE_POLOZKY&&!storedPricing&&storedEnvelope?.legacyPricing!==true);
  const overlay=document.createElement('div');overlay.id='orderOverlay';overlay.className='overlay';
  const statuses=['ČEKÁ SE','DOKONČENO','NEDORAZIL','ZRUŠENO'];
  overlay.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="orderEditorTitle"><div class="modal-head"><div><div class="eyebrow">${editing?'ÚPRAVA OBJEDNÁVKY':'NOVÁ OFFLINE OBJEDNÁVKA'}</div><h2 id="orderEditorTitle">${editing?orderIdMarkup(o.ORDER_ID):draft110?'Kontrola načtené objednávky':'Nová objednávka'}</h2><div class="muted">${editing?'Změny se uloží ke stejné objednávce.':'Číslo OF… přidělím při uložení.'}</div></div><button class="close" type="button" aria-label="Zavřít">×</button></div><form id="orderForm" data-editing43="${editing}"><div class="form-grid">
@@ -1311,6 +1329,7 @@ function openPerfectOrderEditor(order,draft110=null){
  <label>E-mail (nepovinný)<input class="field" name="EMAIL" type="email" value="${esc(o.EMAIL||'')}" autocomplete="email"></label>
  </div><div id="orderMatch" class="muted" aria-live="polite" style="margin-top:12px"></div><div id="orderMessage" class="message" role="status" aria-live="polite"></div><div class="form-actions"><button type="button" class="btn secondary cancel">Zrušit</button><button type="submit" class="btn" disabled>Načítám formulář…</button></div></form></div>`;
  document.body.appendChild(overlay);const form=overlay.querySelector('form'),fields=form.elements,msg=overlay.querySelector('#orderMessage'),submit=form.querySelector('[type=submit]');
+ if(legacyPricing114)msg.textContent='Starší cenový rozpis: uložená cena zůstane zachovaná, dokud nezměníš cenové položky.';
  let services=[],catalogReady=false,workersReady=false,saving=false,pricingChanged=!editing,manualTotal=!!(storedPricing&&storedPricing.manualTotal)||!!(draft110&&draft110.CENA_CELKEM!==undefined),requestId=window.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
  const enable=()=>{submit.disabled=!catalogReady||!workersReady||saving;submit.textContent=editing?'Uložit změny':'Uložit objednávku';overlay.querySelector('#priceAuto31').disabled=!catalogReady||saving;};
  const close=()=>{if(!saving)overlay.remove();};overlay.querySelector('.close').onclick=close;overlay.querySelector('.cancel').onclick=close;overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
@@ -2023,7 +2042,8 @@ window.perfectOpenAdminPanel=function(){if(typeof oldOpenAdminPanel==='function'
     const data=await request(selected);if(!overlay.isConnected||seq!==sequence)return;
     const group=data.group==='A'?'#46b7ff':data.group==='B'?'#c47cff':'#aaa';
     const date=new Date(data.month+'-01T12:00:00Z'),offset=(date.getUTCDay()+6)%7;
-    target.innerHTML=`<p class="muted">Barevně = plánovaná směna · zelený okraj = potvrzeno odpracování. Částka se zobrazí po potvrzení směny administrátorem.</p><div class="roster26-grid">${['Po','Út','St','Čt','Pá','So','Ne'].map(d=>`<b>${d}</b>`).join('')}${'<span></span>'.repeat(offset)}${data.days.map(d=>`<div class="roster26-day ${d.planned?'planned':''} ${d.worked?'worked':''}" style="--roster-color:${group}"><b>${Number(d.date.slice(8))}</b><small>${d.worked?'Odpracováno':d.planned?'Směna':'Volno'}</small>${d.worked?`<strong>${d.amount===null?'Částka čeká':money(d.amount)}</strong>`:''}</div>`).join('')}</div><p><b>Potvrzené odměny za měsíc: ${money(data.total)}</b></p>`;
+    target.innerHTML=`<p class="muted">Barevně = plánovaná směna · zelený okraj = potvrzeno odpracování. Částka se zobrazí po potvrzení směny administrátorem.</p><div class="roster26-grid">${['Po','Út','St','Čt','Pá','So','Ne'].map(d=>`<b>${d}</b>`).join('')}${'<span></span>'.repeat(offset)}${data.days.map(d=>`<button type="button" data-own-day114="${esc(d.date)}" class="roster26-day ${d.planned?'planned':''} ${d.worked?'worked':''}" style="--roster-color:${group}"><b>${Number(d.date.slice(8))}</b><small>${d.worked?'Odpracováno':d.planned?'Směna':'Volno'}</small>${d.worked?`<strong>${d.amount===null?'Částka čeká':money(d.amount)}</strong>`:''}</button>`).join('')}</div><p><b>Potvrzené odměny za měsíc: ${money(data.total)}</b></p>`;
+    target.querySelectorAll('[data-own-day114]').forEach(b=>b.onclick=()=>window.perfectOwnDay114(b.dataset.ownDay114));
    }catch(e){if(seq===sequence)target.textContent='Směnář se nepodařilo načíst: '+(e.message||e);}
   }
   panel.querySelector('[data-roster-month]').onchange=draw;
@@ -2551,7 +2571,7 @@ const PerfectCustomerWarning102=(()=>{
  }
  document.addEventListener('click',ev=>{const b=ev.target.closest('[data-p102-flag-edit]');if(b){ev.preventDefault();edit(b.dataset.p102FlagEdit);}});
  const originalCard=perfectOpenCardV9;perfectOpenCardV9=function(kind,id,ready110=false){const before=new Set(document.querySelectorAll('.overlay')),result=originalCard(kind,id,ready110);const overlay=[...document.querySelectorAll('.overlay')].find(el=>!before.has(el));if(overlay){const item=(kind==='customer'?state.customers:state.vehicles).find(r=>String(r[kind==='customer'?'CUSTOMER_ID':'VEHICLE_ID'])===String(id));const modal=overlay.querySelector('.pd-modal');if(modal&&!modal.querySelector('[data-p102-panel]'))modal.insertAdjacentHTML('beforeend',panel(item));}return result;};
- const originalEditor=openPerfectOrderEditor;openPerfectOrderEditor=function(order){originalEditor(order);const overlay=document.getElementById('orderOverlay');if(!overlay||overlay.querySelector('[data-p102-order-warning]'))return;const section=document.createElement('section');section.className='section p102-order-warning';section.dataset.p102OrderWarning='';overlay.querySelector('#orderMatch').after(section);const field=overlay.querySelector('[name="TELEFON"]');let generation=0,lastId='';
+ const originalEditor=openPerfectOrderEditor;openPerfectOrderEditor=function(order,draft110){originalEditor(order,draft110);const overlay=document.getElementById('orderOverlay');if(!overlay||overlay.querySelector('[data-p102-order-warning]'))return;const section=document.createElement('section');section.className='section p102-order-warning';section.dataset.p102OrderWarning='';overlay.querySelector('#orderMatch').after(section);const field=overlay.querySelector('[name="TELEFON"]');let generation=0,lastId='';
   async function update(){const candidate={CUSTOMER_ID:order?.CUSTOMER_ID||'',TELEFON:field.value},id=customerId(candidate),seq=++generation;section.innerHTML=id?panel(id):'<p class="muted">Po zadání telefonu existujícího zákazníka se zde zobrazí jeho případné upozornění.</p>';if(!id||id===lastId)return;lastId=id;try{const r=await call('perfect102CustomerFlagGet',[id]);if(section.isConnected&&seq===generation)apply(r.record);}catch(err){if(section.isConnected&&seq===generation){lastId='';const p=document.createElement('p');p.className='notice';p.textContent='Upozornění se nepodařilo ověřit: '+err.message;section.append(p);}}}
   field.addEventListener('blur',update);update();
  };

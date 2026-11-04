@@ -24,7 +24,16 @@ function perfectProfile54GetRoster(token,input) {
     var result=perfect40Original_perfectRosterGetMineV25_(token,{month:month});
     if(!result||result.success!==true||!Array.isArray(result.days))
       throw Error('Server nepotvrdil osobní směnář.');
-    return {success:true,month:result.month,group:result.group,
+    var detail=null;
+    if(input&&input.date){
+      var date=String(input.date);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!result.days.some(function(d){return d.date===date;}))throw Error('Neplatný den přehledu.');
+      var user=perfectRepairRequireUser_(token),view=perfectBoxes49Overview_({from:date,to:date});
+      var own=view.daily.filter(function(d){return String(d.userId)===String(user.id);});
+      var stations=own.map(function(d){return d.station;});
+      detail={date:date,shifts:own.map(function(d){return {station:d.station,worked:d.worked===true,revenue:d.assignedRevenue49,pay:d.pay||null,reward:d.reward==null?null:d.reward};}),orders:view.orders.filter(function(o){return o.eligible&&(o.allocations||[]).some(function(a){return stations.indexOf(a.station)>=0&&(!o.shared||a.revenue>0);});}).map(function(o){return {id:o.id,time:o.time,vehicle:o.vehicle,program:o.program,status:o.status,share:(o.allocations||[]).filter(function(a){return stations.indexOf(a.station)>=0;}).reduce(function(n,a){return n+Number(a.revenue||0);},0)};})};
+    }
+    return {success:true,detail:detail,month:result.month,group:result.group,
       days:result.days.map(function(d){return {
         date:d.date,planned:d.planned===true,worked:d.worked===true,
         amount:d.amount==null?null:d.amount,

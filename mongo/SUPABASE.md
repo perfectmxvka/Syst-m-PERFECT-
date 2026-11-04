@@ -121,3 +121,13 @@ prostředí nepřetrvávají, test si svůj aplikační proces spouští a ukon�
   používá viditelně zvolený rok, čas `13h` se rozpozná jako `13:00`.
   Nejde o nový model rozpoznávání rukopisu: těžko čitelný rukopis může stále
   vyžadovat ruční vyplnění. Bez kontroly nelze pokračovat do formuláře objednávky.
+
+## Oprava 114: editor objednávek a cíle oznámení
+
+Starší nebo neznámý cenový rozpis už neblokuje otevření editoru běžné objednávky. Při změně necennových údajů zůstává původní rozpis a cena zachovaná; editor upozorní na starší formát. Zůstává kontrola oprávnění i revize proti souběžnému přepsání. Editor před otevřením načte potřebná data. Předání návrhu z fotografie přes obal editoru je zachované.
+
+Nová oznámení mají cílový odkaz: přiřazená/změněná zakázka otevře detail, denní tržba a výdělek vlastní denní přehled, měsíční bonusy a srážky vlastní odměny za příslušný měsíc. Odkaz vyčká na přihlášení; service worker povoluje jen domovskou cestu stejného webu. Dřívější již doručená oznámení cílový odkaz nemají.
+
+Profil → Směnář: dny kalendáře lze otevřít i zpětně. Přehled ukáže vlastní přiřazené směny, tržbu, rozpad odměny a zakázky. Nepotvrzená směna je označená jako odhad. Zobrazuje se současný uložený stav dne, nikoli neměnná kopie okamžiku doručení oznámení. Měsíční bonusy a srážky zůstávají v měsíčních odměnách. Server odvozuje zaměstnance výhradně z ověřeného tokenu.
+
+Ověření: DOM test reálného formuláře otevře a uloží starší objednávku, zachová cenu/rozpis a otevře den z kalendáře. Testy ověřují podpis Gmail přenosu, cíle oznámení, čekání na login, odmítnutí cizího webu a oddělení vlastních směn. Celá sada `npm test` prošla. Doručení a otevření na fyzickém iPhonu/Androidu je nutné ověřit po nasazení; tato prostředí nejsou součástí lokálního testu.
