@@ -59,13 +59,15 @@ function perfect103InstallForwarder(){
  ScriptApp.newTrigger('perfect103ForwardCron_').timeBased().everyMinutes(5).create();
 }
 /** Jednorázově spustit v původním projektu pod účtem s rezervacemi v Gmailu. */
-function GMAIL_SUPABASE_START_25_10(){
+function GMAIL_SUPABASE_START_25_10(){return perfect103StartFrom_('2026-10-25');}
+function GMAIL_SUPABASE_START_01_11(){return perfect103StartFrom_('2026-11-01');}
+function perfect103StartFrom_(start){
  return gmailEditor52_(function(){
   gmailCheckProduction52_();gmailValidateDependenciesV23_();perfect103Send_([]);
   var lock=LockService.getUserLock();if(!lock.tryLock(1000))throw Error('Import běží; nastavení spusť po jeho dokončení.');
   try{
-   PropertiesService.getScriptProperties().setProperty('PERFECT103_GMAIL_START_DATE','2026-10-25');
-   PropertiesService.getUserProperties().setProperty('PERFECT_GMAIL_V57_HISTORY',JSON.stringify({day:'2026-10-25',offset:0}));
+   PropertiesService.getScriptProperties().setProperty('PERFECT103_GMAIL_START_DATE',start);
+   PropertiesService.getUserProperties().setProperty('PERFECT_GMAIL_V57_HISTORY',JSON.stringify({day:start,offset:0}));
   }finally{lock.releaseLock();}
   perfect40Original_gmailStartAutomaticImport_();perfect103InstallForwarder();
   var imported=perfect40Original_gmailRunAutomaticImport_(),forwarded=perfect103ForwardCron_();

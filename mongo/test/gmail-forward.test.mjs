@@ -36,3 +36,9 @@ test('date configuration default and explicit cutoff',()=>{
  let day=null;const c={PropertiesService:{getScriptProperties:()=>({getProperty:()=>day})}};vm.createContext(c);vm.runInContext(src,c);
  assert.equal(c.gmailStartDate103_(),'2026-10-17');day='2026-10-25';assert.equal(c.gmailStartDate103_(),day);day='bad';assert.throws(()=>c.gmailStartDate103_());
 });
+test('November activation resets history to November 1 and installs both jobs',()=>{
+ const f=fixture(),p={},u={};let gmailJob=false,forwardJob=false;
+ Object.assign(f.ctx,{gmailEditor52_:fn=>fn(),gmailValidateDependenciesV23_(){},LockService:{getUserLock:()=>({tryLock:()=>true,releaseLock(){}})},PropertiesService:{getScriptProperties:()=>({setProperty:(k,v)=>p[k]=v}),getUserProperties:()=>({setProperty:(k,v)=>u[k]=v})},perfect103Send_:()=>({success:true}),perfect40Original_gmailStartAutomaticImport_:()=>gmailJob=true,perfect103InstallForwarder:()=>forwardJob=true,perfect40Original_gmailRunAutomaticImport_:()=>({}),perfect103ForwardCron_:()=>({})});
+ f.ctx.GMAIL_SUPABASE_START_01_11();
+ assert.equal(p.PERFECT103_GMAIL_START_DATE,'2026-11-01');assert.deepEqual(JSON.parse(u.PERFECT_GMAIL_V57_HISTORY),{day:'2026-11-01',offset:0});assert.ok(gmailJob&&forwardJob);
+});
