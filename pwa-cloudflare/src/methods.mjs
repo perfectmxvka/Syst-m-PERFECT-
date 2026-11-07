@@ -15,6 +15,7 @@ export const ALLOWED_METHODS=[
   "perfectAdminUsersHistory",
   "perfectAdminUsersList",
   "perfectAdminUsersSave",
+  "perfectAdminUsersDelete",
   "perfectAuthChangePassword",
   "perfectAuthGetMyProfile",
   "perfectAuthGetStatus",
