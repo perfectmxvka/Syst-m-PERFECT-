@@ -24,7 +24,7 @@ function perfectAdminUsersAudit_(actor,action,target,details){
 }
 function perfect40Original_perfectAdminUsersList_(token){
   perfectAuthRequireAdmin_(token);
-  return {users:perfectRepairUsers_().map(perfectAdminUsersPublic_)
+  return {users:perfectRepairUsers_().filter(function(u){return !u.deleted115;}).map(perfectAdminUsersPublic_)
     .sort(function(a,b){return (a.firstName+' '+a.surname).localeCompare(b.firstName+' '+b.surname,'cs');})};
 }
 function perfect40Original_perfectAdminUsersHistory_(token){
@@ -85,4 +85,22 @@ function perfect40Original_perfectAdminUsersGetAvatar_(token,id){
     if(!/^image\/(jpeg|png|webp)$/.test(mime)||blob.getSize()>180000)return {data:''};
     return {data:'data:'+mime+';base64,'+Utilities.base64Encode(blob.getBytes())};
   }catch(e){return {data:''};}
+}
+
+/** Remove access and hide the account from management while preserving payroll history. */
+function perfectAdminUsersDelete(token,input){
+ return perfect40Enter_('perfectAdminUsersDelete',function(t,p){
+  var actor=perfect43Require_(t,'users.manage');
+  return perfectRepairLock_(function(){
+   var users=perfectRepairUsers_(),target=users.find(function(u){return String(u.id)===String(p&&p.id);});
+   if(!target||target.deleted115)throw Error('Účet není dostupný.');
+   perfect40GuardUser_(actor,{id:target.id});
+   if(String(actor.id)===String(target.id))throw Error('Vlastní účet nelze odstranit.');
+   target.active=false;target.deleted115=true;
+   var props=perfectRepairProps_();props.setProperty(PERFECT_REPAIR.USERS,JSON.stringify(users));
+   var all=props.getProperties();Object.keys(all).filter(function(k){return k.indexOf('PERFECT_REPAIR_SESSION_')===0;}).forEach(function(k){try{if(String(JSON.parse(all[k]).userId)===String(target.id))props.deleteProperty(k);}catch(e){}});
+   perfectAdminUsersAudit_(actor,'DELETE',target,'Odebrán přístup; historické směny zachovány.');
+   return {success:true};
+  });
+ },arguments,'users.manage');
 }

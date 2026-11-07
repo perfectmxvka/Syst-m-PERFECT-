@@ -49,6 +49,6 @@ function perfectProfile54Read_(token,cap,operation) {
   var actor=perfect40Require_(token,cap);
   return perfect40Trusted_(function(){
     var previousActor=perfect43Actor_;perfect43Actor_=actor;
-    try{return operation();}finally{perfect43Actor_=previousActor;}
+    try{return perfect43HideOwners_(operation(),perfectRepairUsers_().filter(function(u){return perfect40Super_(u)&&String(u.id)!==String(actor.id);}));}finally{perfect43Actor_=previousActor;}
   });
 }

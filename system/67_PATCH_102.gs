@@ -34,7 +34,7 @@ function database102Events_(){
  });
 }
 function perfect102State_(events){var latest=new Map(),history=new Map();events.forEach(function(e){var key=e.record.type+'|'+e.record.id,list=history.get(key);if(!list){list=[];history.set(key,list);}list.push(e.record);latest.set(key,e.record);});return {latest:latest,history:history};}
-function perfect102Target_(actor,id){id=String(id||'');var user=perfectRepairUsers_().find(function(u){return String(u.id)===id;});if(!user||!perfect40Super_(actor)&&perfect40Super_(user))throw Error('Zaměstnanec není dostupný.');return user;}
+function perfect102Target_(actor,id){id=String(id||'');var user=perfectRepairUsers_().find(function(u){return String(u.id)===id;});if(!user||String(actor.id)!==String(user.id)&&perfect40Super_(user))throw Error('Zaměstnanec není dostupný.');return user;}
 function perfect102Write_(token,cap,admin,input,normalize){
  return perfect101Context_(token,cap,function(actor){if(admin)perfect102RequireAdmin_(actor);
   return perfectDatabaseWithLock_('PATCH 1.02 zápis',function(){

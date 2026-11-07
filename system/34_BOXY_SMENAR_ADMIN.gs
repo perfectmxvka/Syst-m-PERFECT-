@@ -87,6 +87,7 @@ function perfect40Original_perfectBoxesSaveShiftV25_(token,input){
   var weekendBonus=perfectBoxes42Bonus_(date,station,bonusInput||0);
   if(weekendBonus&&(!userId||input.worked!==true))throw Error('Víkendový bonus vyžaduje přiřazeného pracovníka a potvrzenou odpracovanou směnu.');
   var saved=databaseBoxes25SaveShift_(token,Object.assign({},input,{weekendBonus:weekendBonus}));
+  if(userId&&input.worked===true&&['BOX1','BOX2'].indexOf(station)>=0)databaseShift115Complete_(date,[station]);
   if(typeof SpreadsheetApp.flush==='function')SpreadsheetApp.flush();
   var record=perfectBoxes29Rows_('shift',date,date).filter(function(r){return r.KEY===saved.KEY;})[0];
   if(!record||record.VERSION!==saved.VERSION||String(record.USER_ID)!==userId||record.ACTIVE!==!!userId||record.WORKED!==(!!userId&&input.worked===true)||Number(record.WEEKEND_BONUS42||0)!==weekendBonus)throw new Error('Ulozeni smeny nebylo potvrzeno ctenim databaze. Obnov prehled pred dalsim pokusem.');

@@ -32,7 +32,7 @@ function perfect101Employees(token,input){
   var p=input||{},month=perfect101Month_(p.month),all=perfect102Admin_(actor)&&perfect40Can_(actor,'payroll.read'),selected=String(p.userId||'');
   if(!all&&selected&&selected!==String(actor.id))throw Error('Cizí zaměstnanecké údaje nejsou povolené.');
   var owners102=new Set(perfect40SuperIds_()),actorSuper102=owners102.has(String(actor.id));
-  var users=perfectRepairUsers_().filter(function(u){return (all||String(u.id)===String(actor.id))&&(!selected||String(u.id)===selected)&&(actorSuper102||!owners102.has(String(u.id))||String(u.id)===String(actor.id));});
+  var users=perfectRepairUsers_().filter(function(u){return (all||String(u.id)===String(actor.id))&&(!selected||String(u.id)===selected)&&(!owners102.has(String(u.id))||String(u.id)===String(actor.id));});
   if(selected&&!users.length)throw Error('Zaměstnanec není dostupný.');
   var period=perfectRoster25Month_(month),source=perfectBoxes49Overview_({from:period.from<'2026-08-01'?'2026-08-01':period.from,to:period.to<'2026-08-01'?'2026-08-01':period.to}),events=databaseLunch101Events_(),latest={},historyById=new Map();events.forEach(function(e){latest[e.record.id]=e.record;var list=historyById.get(e.record.id);if(!list){list=[];historyById.set(e.record.id,list);}list.push(e.record);});
   var records=Object.keys(latest).map(function(k){return latest[k];}).filter(function(r){return r.month===month;});

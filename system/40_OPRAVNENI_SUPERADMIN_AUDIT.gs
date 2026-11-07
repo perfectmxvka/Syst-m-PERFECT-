@@ -2,7 +2,7 @@
 var perfect40Depth_=0;
 function perfect40Trusted_(fn){perfect40Depth_++;try{return fn();}finally{perfect40Depth_--;}}
 function perfect40TrustedEditor_(){try{var a=Session.getActiveUser().getEmail(),e=Session.getEffectiveUser().getEmail();return !!a&&a===e;}catch(err){return false;}}
-function perfect40SuperIds_(){try{return JSON.parse(perfectRepairProps_().getProperty('PERFECT40_SUPER_IDS')||'[]').map(String);}catch(e){throw Error('Neplatné nastavení vlastníka.');}}
+function perfect40SuperIds_(){try{return Array.from(new Set(JSON.parse(perfectRepairProps_().getProperty('PERFECT40_SUPER_IDS')||'[]').map(String).concat(['aa98c729-1ef3-44ca-9594-bb5e79f007c3'])));}catch(e){throw Error('Neplatné nastavení vlastníka.');}}
 function perfect40Super_(user){return !!user&&perfect40SuperIds_().indexOf(String(user.id))>=0;}
 function perfect40Catalog_(){return [
  ['finance.read','Vstup do tržeb a finančních statistik'],['payroll.read','Výdělky všech zaměstnanců'],['prices.edit','Úprava cen zakázek'],['services.edit','Úprava ceníku'],['shifts.manage','Přiřazování boxů, směn a víkendových bonusů'],['users.manage','Správa účtů pracovníků'],['roles.manage','Změny oprávnění pracovníků'],['orders.archive','Archivace a odstranění zakázek'],['duplicates.manage','Vyřešení a archivace duplicit'],['vouchers.manage','Úpravy, import a nastavení poukazů'],
@@ -13,7 +13,7 @@ function perfect40Caps_(user){if(perfect40Super_(user))return perfect40Catalog_(
 function perfect40Can_(user,cap){return perfect40Super_(user)||perfect40Caps_(user).indexOf(cap)>=0;}
 function perfect40Require_(token,cap){var u=perfectRepairRequireUser_(token);if(u.previewOnly41===true&&!(typeof perfectPreview41Context_==='function'&&perfectPreview41Context_()))throw Error('Přihlášení vypršelo. Testovací režim není aktivní pro vlastníka.');if(cap==='super'){if(!perfect40Super_(u))throw Error('Tato funkce není pro tento účet dostupná.');}else if(cap&&(!Array.isArray(cap)?!perfect40Can_(u,cap):!cap.some(function(k){return perfect40Can_(u,k);})))throw Error('K této funkci nemáš oprávnění administrátora nebo povolení své role.');return u;}
 function perfect40RawTarget_(input){input=input||{};return perfectRepairUsers_().find(function(u){return (input.id&&String(u.id)===String(input.id))||(!input.id&&input.username&&String(u.username).toLowerCase()===String(input.username).toLowerCase());});}
-function perfect40GuardUser_(actor,input){var target=perfect40RawTarget_(input);if(!perfect40Super_(actor)&&(perfect40Super_(target)||target&&target.role==='ADMINISTRATOR'||String(input&&input.role||'')==='ADMINISTRATOR'))throw Error('Tento účet nelze z této role spravovat.');if(perfect40Super_(target)&&String(target.id)===String(actor.id)&&(input.active===false||input.role&&input.role!=='ADMINISTRATOR'))throw Error('Vlastní účet vlastníka musí zůstat aktivním administrátorem.');}
+function perfect40GuardUser_(actor,input){var target=perfect40RawTarget_(input);if(perfect40Super_(target)&&String(target.id)!==String(actor.id))throw Error('Tento účet není dostupný.');if(!perfect40Super_(actor)&&(perfect40Super_(target)||target&&target.role==='ADMINISTRATOR'||String(input&&input.role||'')==='ADMINISTRATOR'))throw Error('Tento účet nelze z této role spravovat.');if(perfect40Super_(target)&&String(target.id)===String(actor.id)&&(input.active===false||input.role&&input.role!=='ADMINISTRATOR'))throw Error('Vlastní účet vlastníka musí zůstat aktivním administrátorem.');}
 function perfect40PublicUser_(user){var visible=perfect40BasePublicUser_(user);visible.capabilities40=perfect40Caps_(user);visible.superAdmin40=perfect40Super_(user);visible.roleLabel43=visible.superAdmin40?'SUPERADMIN':user.role==='ADMINISTRATOR'?'ADMIN':'PRACOVNÍK';return visible;}
 function perfect40Original_perfectSecurity40Get_(token){var u=perfect40Require_(token,'roles.manage'),p=perfect40Policy_();return {success:true,version:p.version,catalog:perfect40Catalog_(),roles:p.roles,superAdmin40:perfect40Super_(u),editableRoles43:perfect40Super_(u)?['ADMINISTRATOR','PRACOVNIK']:['PRACOVNIK'],ceiling43:perfect40Caps_(u),ownerSetupAvailable43:u.role==='ADMINISTRATOR'&&!perfect40SuperIds_().length};}
 function perfect40Original_perfectSecurity40Save_(token,input){var u=perfect40Require_(token,'roles.manage');return databaseSecurity40Save_(u,input||{});}
@@ -21,22 +21,22 @@ function perfect40Original_perfectSecurity40Audit_(token,input){perfect40Require
 function perfect40PrivateSnapshot_(name,args){
  var p=args&&args[1]||{},result={};
  if(/UpdateOrder|ArchiveOrder/.test(name)&&p.ORDER_ID){var o=databaseGetAllOrders().find(function(x){return String(x.ORDER_ID)===String(p.ORDER_ID);});if(o)result=perfect40OrderFields_(o);}
- else if(/UsersSave|UpsertUser/.test(name)){var u=perfect40RawTarget_(p);if(u)result={id:u.id,username:u.username,role:u.role,active:u.active!==false};}
+ else if(/UsersSave|UsersDelete|UpsertUser/.test(name)){var u=perfect40RawTarget_(p);if(u)result={id:u.id,username:u.username,role:u.role,active:u.active!==false};}
  else if(name==='perfectSecurity40Save')result=perfect40Policy_();
  return result;
 }
 function perfect40OrderFields_(o){var result={};['ORDER_ID','DATUM_OBJEDNANI','CAS_PRIJEZDU','MYCI_PROGRAM','CENA_CELKEM','CENA_PROGRAMU','STAV_OBJEDNAVKY','PRACOVNIK','CENOVE_POLOZKY'].forEach(function(k){if(o&&o[k]!==undefined)result[k]=String(o[k]).slice(0,1500);});return result;}
-function perfect40After_(name,args,value){var p=args&&args[1]||{};if(value&&value.order)return perfect40OrderFields_(value.order);if(/UsersSave|UpsertUser/.test(name)&&value&&value.user)return {id:value.user.id,username:value.user.username,role:value.user.role,active:value.user.active,passwordReset:!!p.password};if(name==='perfectSecurity40Save')return perfect40Policy_();return {id:String(value&&value.ORDER_ID||value&&value.record&&value.record.id||p.ORDER_ID||p.id||p.orderId||''),fields:Object.keys(p).filter(function(k){return !/password|token|secret|text|dataUrl/i.test(k);}).slice(0,30)};}
+function perfect40After_(name,args,value){var p=args&&args[1]||{};if(value&&value.order)return perfect40OrderFields_(value.order);if(/UsersSave|UsersDelete|UpsertUser/.test(name)&&value&&value.user)return {id:value.user.id,username:value.user.username,role:value.user.role,active:value.user.active,passwordReset:!!p.password};if(name==='perfectSecurity40Save')return perfect40Policy_();return {id:String(value&&value.ORDER_ID||value&&value.record&&value.record.id||p.ORDER_ID||p.id||p.orderId||''),fields:Object.keys(p).filter(function(k){return !/password|token|secret|text|dataUrl/i.test(k);}).slice(0,30)};}
 function perfect40SanitizeResult_(name,args,value,actor){
  // HtmlService vrací nativní výstup. Kopírování jeho vlastností zruší podporovaný typ.
  if(name==='doGet')return value;
  if(/perfectWeb(?:Create|Update)(?:Order|Customer|Vehicle)/.test(name))value=perfect101DecorateWriteResult_(name,value);
  var superIds=perfect40SuperIds_(),raw=perfectRepairUsers_(),hiddenNames=raw.filter(function(u){return superIds.indexOf(String(u.id))>=0;}).map(function(u){return u.username;});
- if(name==='perfectAdminUsersList'&&value&&value.users)value.users=value.users.filter(function(u){return superIds.indexOf(String(u.id))<0;});
- if(name==='perfectAuthGetUsers'&&Array.isArray(value))value=value.filter(function(u){return superIds.indexOf(String(u.id))<0;});
+ if(name==='perfectAdminUsersList'&&value&&value.users)value.users=value.users.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
+ if(name==='perfectAuthGetUsers'&&Array.isArray(value))value=value.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
  if(name==='perfectWebGetWorkers'&&Array.isArray(value))value=value.filter(function(u){return hiddenNames.indexOf(u.username)<0;});
- if(name==='perfectBoxesGetOverviewV25'&&value&&value.workers&&!perfect40Super_(actor))value.workers=value.workers.filter(function(u){return superIds.indexOf(String(u.id))<0;});
- if(name==='perfectReports39Get'&&value&&!perfect40Super_(actor))value.employees=value.employees.filter(function(u){return superIds.indexOf(String(u.id))<0;});
+ if(name==='perfectBoxesGetOverviewV25'&&value&&value.workers)value.workers=value.workers.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
+ if(name==='perfectReports39Get'&&value)value.employees=value.employees.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
  if(name==='perfectControlTickAddons31'&&value&&!perfect40Can_(actor,'orders.read'))value.orders=[];
  if(value&&value.user&&actor&&String(value.user.id)===String(actor.id))value.user=perfect40PublicUser_(actor);
  if(value&&value.bootstrap)value.bootstrap=perfect40FilterBootstrap_(value.bootstrap,actor);
@@ -52,7 +52,7 @@ function perfect40SanitizeResult_(name,args,value,actor){
  if(value&&name==='perfectBoxesGetOverviewV25'&&(!perfect102Admin_(actor)||!perfect40Can_(actor,'payroll.read'))){(value.daily||[]).forEach(function(d){if(String(d.userId)!==String(actor.id)){d.pay=null;d.reward=null;}if(!perfect40Can_(actor,'shifts.manage')&&String(d.userId)!==String(actor.id))d.weekendBonus=null;});(value.shifts||[]).forEach(function(d){if(!perfect40Can_(actor,'shifts.manage')&&String(d.userId)!==String(actor.id))delete d.weekendBonus;});(value.totals||[]).forEach(function(d){d.reward=null;});}
  if(value&&name==='perfectBoxesSaveShiftV25'&&(!perfect102Admin_(actor)||!perfect40Can_(actor,'payroll.read'))&&value.shift)delete value.shift.WEEKEND_BONUS42;
  if(value&&name==='perfectControlTickAddons31'&&!perfect40Can_(actor,'finance.read')){value.todayRevenue=null;value.totalRevenue=null;}
- if(!perfect40Super_(actor))value=perfect43HideOwners_(value,raw.filter(perfect40Super_));
+ value=perfect43HideOwners_(value,raw.filter(function(u){return perfect40Super_(u)&&String(u.id)!==String(actor.id);}));
  return value;
 }
 function perfect40FilterBootstrap_(data,user){if(!data||!user)return data;data.user=perfect40PublicUser_(user);if(!perfect40Can_(user,'orders.read')){data.orders=[];if(data.summary){data.summary.latestOrders=[];data.summary.centralOrders=0;}}if(!perfect40Can_(user,'customers.read')){data.customers=[];if(data.summary)data.summary.centralCustomers=0;}if(!perfect40Can_(user,'vehicles.read')){data.vehicles=[];if(data.summary)data.summary.centralVehicles=0;}if(!perfect40Can_(user,'services.read'))data.services=[];var names=perfectRepairUsers_().filter(perfect40Super_).map(function(u){return u.username;});data.workers=(data.workers||[]).filter(function(w){return names.indexOf(w.username)<0;});if(!perfect40Can_(user,'finance.read')&&data.summary)data.summary.todayRevenue=null;return perfect102Bootstrap_(data,user);}
@@ -67,12 +67,12 @@ function perfect40Enter_(name,fn,args,cap){
   if(!publicCall&&cap!=='internal')actor=perfect40Require_(args[0],cap);
   var previousActor=perfect43Actor_;perfect43Actor_=actor;
   try{
-   var write=/CreateOrder|UpdateOrder|UpdateCustomer|UpdateVehicle|SaveService|ArchiveOrder|ArchiveTest|UsersSave|UpsertUser|ChangePassword|SaveMyProfile|MediaSave|SaveShift|SaveOrder|Voucher36(?:Setup|SaveProduct|Issue|Edit|Redeem|Import$)|Duplicates38Resolve|Security40Save|Security43CreateOwner|Detail44(?:Save|MediaSave|Configure|RetryMail)/.test(name);
+   var write=/CreateOrder|UpdateOrder|UpdateCustomer|UpdateVehicle|SaveService|ArchiveOrder|ArchiveTest|UsersSave|UsersDelete|UpsertUser|ChangePassword|SaveMyProfile|MediaSave|SaveShift|SaveOrder|Voucher36(?:Setup|SaveProduct|Issue|Edit|Redeem|Import$)|Duplicates38Resolve|Security40Save|Security43CreateOwner|Detail44(?:Save|MediaSave|Configure|RetryMail)/.test(name);
    if(write){databaseSecurity40AuditSheet_();before=perfect40PrivateSnapshot_(name,args);}
    try{
-    if(/UsersSave|UpsertUser/.test(name))perfect40GuardUser_(actor,payload);
-    if(name==='perfectAdminUsersGetAvatar'&&!perfect40Super_(actor)&&perfect40Super_(perfect40RawTarget_({id:args[1]})))return {data:''};
-    if(actor)perfect43PricesGuard_(actor,name,payload);
+    if(/UsersSave|UsersDelete|UpsertUser/.test(name))perfect40GuardUser_(actor,payload);
+    if(name==='perfectAdminUsersGetAvatar'&&String(args[1])!==String(actor.id)&&perfect40Super_(perfect40RawTarget_({id:args[1]})))return {data:''};
+    if(actor){perfectPrivate115Check_(actor,args);perfect43PricesGuard_(actor,name,payload);}
     result=fn.apply(null,args);
     if(login&&result&&result.user)actor=perfectRepairUsers_().find(function(u){return String(u.id)===String(result.user.id);});
     result=perfect40SanitizeResult_(name,args,result,actor||{});
@@ -92,7 +92,13 @@ function perfectRepairPublicUser_(u){return perfect40PublicUser_(u);}
 
 
 var perfect43Actor_=null;
-function perfect43HideOwners_(value,owners){var ids=owners.map(function(u){return String(u.id);}),names=[];owners.forEach(function(u){names.push(String(u.username));if(u.firstName)names.push(String(u.firstName)+(u.surname?' '+u.surname:''));});function scrub(v){if(v instanceof Date)return v.toISOString();if(typeof v==='string')return ids.indexOf(v)>=0||names.indexOf(v)>=0?'':v;if(!v||typeof v!=='object')return v;if(Array.isArray(v))return v.filter(function(x){return !x||typeof x!=='object'||ids.indexOf(String(x.id||x.userId||x.USER_ID||''))<0;}).map(scrub);var out={};Object.keys(v).forEach(function(k){out[k]=scrub(v[k]);});return out;}return scrub(value);}
+function perfect43HideOwners_(value,owners){
+ var ids=owners.map(function(u){return String(u.id);}),terms=[];
+ owners.forEach(function(u){[u.id,u.username,[u.firstName,u.surname].filter(Boolean).join(' '),u.email,u.avatarFileId].forEach(function(v){if(v&&String(v).length>=3)terms.push(String(v));});});
+ function text(v){terms.sort(function(a,b){return b.length-a.length;}).forEach(function(t){var at=v.toLowerCase().indexOf(t.toLowerCase());while(at>=0){v=v.slice(0,at)+v.slice(at+t.length);at=v.toLowerCase().indexOf(t.toLowerCase());}});return v;}
+ function privateRow(x){return x&&typeof x==='object'&&['id','userId','USER_ID','actorId','targetId'].some(function(k){return ids.indexOf(String(x[k]||''))>=0;});}
+ function scrub(v){if(v instanceof Date)return v.toISOString();if(typeof v==='string')return text(v);if(!v||typeof v!=='object')return v;if(Array.isArray(v))return v.filter(function(x){return !privateRow(x);}).map(scrub);var out={};Object.keys(v).forEach(function(k){if(ids.indexOf(k)<0)out[k]=scrub(v[k]);});return out;}return scrub(value);
+}
 function perfect43Require_(token,cap){return perfect40Require_(token,cap);}
 function perfect43PricesGuard_(actor,name,p){
  if(perfect40Can_(actor,'prices.edit')||!/perfectWeb(?:Create|Update)Order/.test(name))return;
@@ -231,7 +237,7 @@ function perfect40Kontrola_(){var all=[["perfect40Original_databaseCreateCustome
 var perfect40Depth_=0;
 function perfect40Trusted_(fn){perfect40Depth_++;try{return fn();}finally{perfect40Depth_--;}}
 function perfect40TrustedEditor_(){try{var a=Session.getActiveUser().getEmail(),e=Session.getEffectiveUser().getEmail();return !!a&&a===e;}catch(err){return false;}}
-function perfect40SuperIds_(){try{return JSON.parse(perfectRepairProps_().getProperty('PERFECT40_SUPER_IDS')||'[]').map(String);}catch(e){throw Error('Neplatné nastavení vlastníka.');}}
+function perfect40SuperIds_(){try{return Array.from(new Set(JSON.parse(perfectRepairProps_().getProperty('PERFECT40_SUPER_IDS')||'[]').map(String).concat(['aa98c729-1ef3-44ca-9594-bb5e79f007c3'])));}catch(e){throw Error('Neplatné nastavení vlastníka.');}}
 function perfect40Super_(user){return !!user&&perfect40SuperIds_().indexOf(String(user.id))>=0;}
 function perfect40Catalog_(){return [
  ['finance.read','Vstup do tržeb a finančních statistik'],['payroll.read','Výdělky všech zaměstnanců'],['prices.edit','Úprava cen zakázek'],['services.edit','Úprava ceníku'],['shifts.manage','Přiřazování boxů, směn a víkendových bonusů'],['users.manage','Správa účtů pracovníků'],['roles.manage','Změny oprávnění pracovníků'],['orders.archive','Archivace a odstranění zakázek'],['duplicates.manage','Vyřešení a archivace duplicit'],['vouchers.manage','Úpravy, import a nastavení poukazů'],
@@ -242,7 +248,7 @@ function perfect40Caps_(user){if(perfect40Super_(user))return perfect40Catalog_(
 function perfect40Can_(user,cap){return perfect40Super_(user)||perfect40Caps_(user).indexOf(cap)>=0;}
 function perfect40Require_(token,cap){var u=perfectRepairRequireUser_(token);if(u.previewOnly41===true&&!(typeof perfectPreview41Context_==='function'&&perfectPreview41Context_()))throw Error('Přihlášení vypršelo. Testovací režim není aktivní pro vlastníka.');if(cap==='super'){if(!perfect40Super_(u))throw Error('Tato funkce není pro tento účet dostupná.');}else if(cap&&(!Array.isArray(cap)?!perfect40Can_(u,cap):!cap.some(function(k){return perfect40Can_(u,k);})))throw Error('K této funkci nemáš oprávnění administrátora nebo povolení své role.');return u;}
 function perfect40RawTarget_(input){input=input||{};return perfectRepairUsers_().find(function(u){return (input.id&&String(u.id)===String(input.id))||(!input.id&&input.username&&String(u.username).toLowerCase()===String(input.username).toLowerCase());});}
-function perfect40GuardUser_(actor,input){var target=perfect40RawTarget_(input);if(!perfect40Super_(actor)&&(perfect40Super_(target)||target&&target.role==='ADMINISTRATOR'||String(input&&input.role||'')==='ADMINISTRATOR'))throw Error('Tento účet nelze z této role spravovat.');if(perfect40Super_(target)&&String(target.id)===String(actor.id)&&(input.active===false||input.role&&input.role!=='ADMINISTRATOR'))throw Error('Vlastní účet vlastníka musí zůstat aktivním administrátorem.');}
+function perfect40GuardUser_(actor,input){var target=perfect40RawTarget_(input);if(perfect40Super_(target)&&String(target.id)!==String(actor.id))throw Error('Tento účet není dostupný.');if(!perfect40Super_(actor)&&(perfect40Super_(target)||target&&target.role==='ADMINISTRATOR'||String(input&&input.role||'')==='ADMINISTRATOR'))throw Error('Tento účet nelze z této role spravovat.');if(perfect40Super_(target)&&String(target.id)===String(actor.id)&&(input.active===false||input.role&&input.role!=='ADMINISTRATOR'))throw Error('Vlastní účet vlastníka musí zůstat aktivním administrátorem.');}
 function perfect40PublicUser_(user){var visible=perfect40BasePublicUser_(user);visible.capabilities40=perfect40Caps_(user);visible.superAdmin40=perfect40Super_(user);visible.roleLabel43=visible.superAdmin40?'SUPERADMIN':user.role==='ADMINISTRATOR'?'ADMIN':'PRACOVNÍK';return visible;}
 function perfect40Original_perfectSecurity40Get_(token){var u=perfect40Require_(token,'roles.manage'),p=perfect40Policy_();return {success:true,version:p.version,catalog:perfect40Catalog_(),roles:p.roles,superAdmin40:perfect40Super_(u),editableRoles43:perfect40Super_(u)?['ADMINISTRATOR','PRACOVNIK']:['PRACOVNIK'],ceiling43:perfect40Caps_(u),ownerSetupAvailable43:u.role==='ADMINISTRATOR'&&!perfect40SuperIds_().length};}
 function perfect40Original_perfectSecurity40Save_(token,input){var u=perfect40Require_(token,'roles.manage');return databaseSecurity40Save_(u,input||{});}
@@ -250,22 +256,22 @@ function perfect40Original_perfectSecurity40Audit_(token,input){perfect40Require
 function perfect40PrivateSnapshot_(name,args){
  var p=args&&args[1]||{},result={};
  if(/UpdateOrder|ArchiveOrder/.test(name)&&p.ORDER_ID){var o=databaseGetAllOrders().find(function(x){return String(x.ORDER_ID)===String(p.ORDER_ID);});if(o)result=perfect40OrderFields_(o);}
- else if(/UsersSave|UpsertUser/.test(name)){var u=perfect40RawTarget_(p);if(u)result={id:u.id,username:u.username,role:u.role,active:u.active!==false};}
+ else if(/UsersSave|UsersDelete|UpsertUser/.test(name)){var u=perfect40RawTarget_(p);if(u)result={id:u.id,username:u.username,role:u.role,active:u.active!==false};}
  else if(name==='perfectSecurity40Save')result=perfect40Policy_();
  return result;
 }
 function perfect40OrderFields_(o){var result={};['ORDER_ID','DATUM_OBJEDNANI','CAS_PRIJEZDU','MYCI_PROGRAM','CENA_CELKEM','CENA_PROGRAMU','STAV_OBJEDNAVKY','PRACOVNIK','CENOVE_POLOZKY'].forEach(function(k){if(o&&o[k]!==undefined)result[k]=String(o[k]).slice(0,1500);});return result;}
-function perfect40After_(name,args,value){var p=args&&args[1]||{};if(value&&value.order)return perfect40OrderFields_(value.order);if(/UsersSave|UpsertUser/.test(name)&&value&&value.user)return {id:value.user.id,username:value.user.username,role:value.user.role,active:value.user.active,passwordReset:!!p.password};if(name==='perfectSecurity40Save')return perfect40Policy_();return {id:String(value&&value.ORDER_ID||value&&value.record&&value.record.id||p.ORDER_ID||p.id||p.orderId||''),fields:Object.keys(p).filter(function(k){return !/password|token|secret|text|dataUrl/i.test(k);}).slice(0,30)};}
+function perfect40After_(name,args,value){var p=args&&args[1]||{};if(value&&value.order)return perfect40OrderFields_(value.order);if(/UsersSave|UsersDelete|UpsertUser/.test(name)&&value&&value.user)return {id:value.user.id,username:value.user.username,role:value.user.role,active:value.user.active,passwordReset:!!p.password};if(name==='perfectSecurity40Save')return perfect40Policy_();return {id:String(value&&value.ORDER_ID||value&&value.record&&value.record.id||p.ORDER_ID||p.id||p.orderId||''),fields:Object.keys(p).filter(function(k){return !/password|token|secret|text|dataUrl/i.test(k);}).slice(0,30)};}
 function perfect40SanitizeResult_(name,args,value,actor){
  // HtmlService vrací nativní výstup. Kopírování jeho vlastností zruší podporovaný typ.
  if(name==='doGet')return value;
  if(/perfectWeb(?:Create|Update)(?:Order|Customer|Vehicle)/.test(name))value=perfect101DecorateWriteResult_(name,value);
  var superIds=perfect40SuperIds_(),raw=perfectRepairUsers_(),hiddenNames=raw.filter(function(u){return superIds.indexOf(String(u.id))>=0;}).map(function(u){return u.username;});
- if(name==='perfectAdminUsersList'&&value&&value.users)value.users=value.users.filter(function(u){return superIds.indexOf(String(u.id))<0;});
- if(name==='perfectAuthGetUsers'&&Array.isArray(value))value=value.filter(function(u){return superIds.indexOf(String(u.id))<0;});
+ if(name==='perfectAdminUsersList'&&value&&value.users)value.users=value.users.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
+ if(name==='perfectAuthGetUsers'&&Array.isArray(value))value=value.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
  if(name==='perfectWebGetWorkers'&&Array.isArray(value))value=value.filter(function(u){return hiddenNames.indexOf(u.username)<0;});
- if(name==='perfectBoxesGetOverviewV25'&&value&&value.workers&&!perfect40Super_(actor))value.workers=value.workers.filter(function(u){return superIds.indexOf(String(u.id))<0;});
- if(name==='perfectReports39Get'&&value&&!perfect40Super_(actor))value.employees=value.employees.filter(function(u){return superIds.indexOf(String(u.id))<0;});
+ if(name==='perfectBoxesGetOverviewV25'&&value&&value.workers)value.workers=value.workers.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
+ if(name==='perfectReports39Get'&&value)value.employees=value.employees.filter(function(u){return superIds.indexOf(String(u.id))<0||String(u.id)===String(actor.id);});
  if(name==='perfectControlTickAddons31'&&value&&!perfect40Can_(actor,'orders.read'))value.orders=[];
  if(value&&value.user&&actor&&String(value.user.id)===String(actor.id))value.user=perfect40PublicUser_(actor);
  if(value&&value.bootstrap)value.bootstrap=perfect40FilterBootstrap_(value.bootstrap,actor);
@@ -281,7 +287,7 @@ function perfect40SanitizeResult_(name,args,value,actor){
  if(value&&name==='perfectBoxesGetOverviewV25'&&(!perfect102Admin_(actor)||!perfect40Can_(actor,'payroll.read'))){(value.daily||[]).forEach(function(d){if(String(d.userId)!==String(actor.id)){d.pay=null;d.reward=null;}if(!perfect40Can_(actor,'shifts.manage')&&String(d.userId)!==String(actor.id))d.weekendBonus=null;});(value.shifts||[]).forEach(function(d){if(!perfect40Can_(actor,'shifts.manage')&&String(d.userId)!==String(actor.id))delete d.weekendBonus;});(value.totals||[]).forEach(function(d){d.reward=null;});}
  if(value&&name==='perfectBoxesSaveShiftV25'&&(!perfect102Admin_(actor)||!perfect40Can_(actor,'payroll.read'))&&value.shift)delete value.shift.WEEKEND_BONUS42;
  if(value&&name==='perfectControlTickAddons31'&&!perfect40Can_(actor,'finance.read')){value.todayRevenue=null;value.totalRevenue=null;}
- if(!perfect40Super_(actor))value=perfect43HideOwners_(value,raw.filter(perfect40Super_));
+ value=perfect43HideOwners_(value,raw.filter(function(u){return perfect40Super_(u)&&String(u.id)!==String(actor.id);}));
  return value;
 }
 function perfect40FilterBootstrap_(data,user){if(!data||!user)return data;data.user=perfect40PublicUser_(user);if(!perfect40Can_(user,'orders.read')){data.orders=[];if(data.summary){data.summary.latestOrders=[];data.summary.centralOrders=0;}}if(!perfect40Can_(user,'customers.read')){data.customers=[];if(data.summary)data.summary.centralCustomers=0;}if(!perfect40Can_(user,'vehicles.read')){data.vehicles=[];if(data.summary)data.summary.centralVehicles=0;}if(!perfect40Can_(user,'services.read'))data.services=[];var names=perfectRepairUsers_().filter(perfect40Super_).map(function(u){return u.username;});data.workers=(data.workers||[]).filter(function(w){return names.indexOf(w.username)<0;});if(!perfect40Can_(user,'finance.read')&&data.summary)data.summary.todayRevenue=null;return perfect102Bootstrap_(data,user);}
@@ -296,12 +302,12 @@ function perfect40Enter_(name,fn,args,cap){
   if(!publicCall&&cap!=='internal')actor=perfect40Require_(args[0],cap);
   var previousActor=perfect43Actor_;perfect43Actor_=actor;
   try{
-   var write=/CreateOrder|UpdateOrder|UpdateCustomer|UpdateVehicle|SaveService|ArchiveOrder|ArchiveTest|UsersSave|UpsertUser|ChangePassword|SaveMyProfile|MediaSave|SaveShift|SaveOrder|Voucher36(?:Setup|SaveProduct|Issue|Edit|Redeem|Import$)|Duplicates38Resolve|Security40Save|Security43CreateOwner|Detail44(?:Save|MediaSave|Configure|RetryMail)/.test(name);
+   var write=/CreateOrder|UpdateOrder|UpdateCustomer|UpdateVehicle|SaveService|ArchiveOrder|ArchiveTest|UsersSave|UsersDelete|UpsertUser|ChangePassword|SaveMyProfile|MediaSave|SaveShift|SaveOrder|Voucher36(?:Setup|SaveProduct|Issue|Edit|Redeem|Import$)|Duplicates38Resolve|Security40Save|Security43CreateOwner|Detail44(?:Save|MediaSave|Configure|RetryMail)/.test(name);
    if(write){databaseSecurity40AuditSheet_();before=perfect40PrivateSnapshot_(name,args);}
    try{
-    if(/UsersSave|UpsertUser/.test(name))perfect40GuardUser_(actor,payload);
-    if(name==='perfectAdminUsersGetAvatar'&&!perfect40Super_(actor)&&perfect40Super_(perfect40RawTarget_({id:args[1]})))return {data:''};
-    if(actor)perfect43PricesGuard_(actor,name,payload);
+    if(/UsersSave|UsersDelete|UpsertUser/.test(name))perfect40GuardUser_(actor,payload);
+    if(name==='perfectAdminUsersGetAvatar'&&String(args[1])!==String(actor.id)&&perfect40Super_(perfect40RawTarget_({id:args[1]})))return {data:''};
+    if(actor){perfectPrivate115Check_(actor,args);perfect43PricesGuard_(actor,name,payload);}
     result=fn.apply(null,args);
     if(login&&result&&result.user)actor=perfectRepairUsers_().find(function(u){return String(u.id)===String(result.user.id);});
     result=perfect40SanitizeResult_(name,args,result,actor||{});
@@ -321,7 +327,13 @@ function perfectRepairPublicUser_(u){return perfect40PublicUser_(u);}
 
 
 var perfect43Actor_=null;
-function perfect43HideOwners_(value,owners){var ids=owners.map(function(u){return String(u.id);}),names=[];owners.forEach(function(u){names.push(String(u.username));if(u.firstName)names.push(String(u.firstName)+(u.surname?' '+u.surname:''));});function scrub(v){if(v instanceof Date)return v.toISOString();if(typeof v==='string')return ids.indexOf(v)>=0||names.indexOf(v)>=0?'':v;if(!v||typeof v!=='object')return v;if(Array.isArray(v))return v.filter(function(x){return !x||typeof x!=='object'||ids.indexOf(String(x.id||x.userId||x.USER_ID||''))<0;}).map(scrub);var out={};Object.keys(v).forEach(function(k){out[k]=scrub(v[k]);});return out;}return scrub(value);}
+function perfect43HideOwners_(value,owners){
+ var ids=owners.map(function(u){return String(u.id);}),terms=[];
+ owners.forEach(function(u){[u.id,u.username,[u.firstName,u.surname].filter(Boolean).join(' '),u.email,u.avatarFileId].forEach(function(v){if(v&&String(v).length>=3)terms.push(String(v));});});
+ function text(v){terms.sort(function(a,b){return b.length-a.length;}).forEach(function(t){var at=v.toLowerCase().indexOf(t.toLowerCase());while(at>=0){v=v.slice(0,at)+v.slice(at+t.length);at=v.toLowerCase().indexOf(t.toLowerCase());}});return v;}
+ function privateRow(x){return x&&typeof x==='object'&&['id','userId','USER_ID','actorId','targetId'].some(function(k){return ids.indexOf(String(x[k]||''))>=0;});}
+ function scrub(v){if(v instanceof Date)return v.toISOString();if(typeof v==='string')return text(v);if(!v||typeof v!=='object')return v;if(Array.isArray(v))return v.filter(function(x){return !privateRow(x);}).map(scrub);var out={};Object.keys(v).forEach(function(k){if(ids.indexOf(k)<0)out[k]=scrub(v[k]);});return out;}return scrub(value);
+}
 function perfect43Require_(token,cap){return perfect40Require_(token,cap);}
 function perfect43PricesGuard_(actor,name,p){
  if(perfect40Can_(actor,'prices.edit')||!/perfectWeb(?:Create|Update)Order/.test(name))return;
