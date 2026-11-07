@@ -14,7 +14,7 @@ test('20:15 Prague respects winter and summer time', () => {
 test('closes both assigned boxes once, preserving workers, pay and audit', () => {
   const state = fixture(), c = createRuntime(state).ctx, date = '2026-10-27';
   for (const [station,userId] of [['BOX1','admin'],['BOX2','other']])
-    c.perfectBoxesSaveShiftV25(token,{date,station,userId,worked:false});
+    c.perfect40Original_perfectBoxesSaveShiftV25_(token,{date,station,userId,worked:false});
   assert.equal(closeShifts(state,date).length,2);
   const after = JSON.stringify(state);
   assert.deepEqual(closeShifts(state,date),[]);
@@ -31,12 +31,12 @@ test('empty boxes do not create shifts', () => {
 
 test('already confirmed shifts and later manual corrections are preserved', () => {
   const state=fixture(), c=createRuntime(state).ctx, date='2026-10-27';
-  c.perfectBoxesSaveShiftV25(token,{date,station:'BOX1',userId:'admin',worked:true});
+  c.perfect40Original_perfectBoxesSaveShiftV25_(token,{date,station:'BOX1',userId:'admin',worked:true});
   const original=c.databaseBoxes25Read_('shift')[0];
   assert.deepEqual(closeShifts(state,date),[]);
   assert.equal(createRuntime(state).ctx.databaseBoxes25Read_('shift')[0].VERSION,original.VERSION);
   const editor=createRuntime(state).ctx;
-  editor.perfectBoxesSaveShiftV25(token,{date,station:'BOX1',userId:'admin',worked:false,version:original.VERSION});
+  editor.perfect40Original_perfectBoxesSaveShiftV25_(token,{date,station:'BOX1',userId:'admin',worked:false,version:original.VERSION});
   assert.deepEqual(closeShifts(state,date),[]);
   assert.equal(createRuntime(state).ctx.databaseBoxes25Read_('shift')[0].WORKED,false);
 });
