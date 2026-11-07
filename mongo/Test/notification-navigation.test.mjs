@@ -1,0 +1,48 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+import {payload} from '../push106.mjs';
+import {diff} from '../worker-events106.mjs';
+import {fixture,token,other} from './fixture110.mjs';
+import {createRuntime} from '../performance107.mjs';
+import {SHIFTS} from '../boxes-read.mjs';
+test('notifications retain order and daily destinations without external redirects',async()=>{
+ const events=diff({assignments:{},days:[]},{assignments:{one:{userId:'a',id:'OF1026-01',date:'2026-10-27'}},days:[{userId:'a',date:'2026-10-27',worked:true,reward:1400,pay:{total:1400}}]});
+ assert.equal(events[0].url,'/#perfect-order=OF1026-01');
+ assert.equal(events.find(e=>e.type==='earnings').url,'/#perfect-day=2026-10-27');
+ const handlers={},shown=[],opened=[],messages=[];
+ let windows=[];
+ const self={location:{origin:'https://perfect.example'},addEventListener:(k,v)=>handlers[k]=v,registration:{showNotification:async(t,o)=>shown.push(o)},clients:{matchAll:async()=>windows,openWindow:async url=>opened.push(url)}};
+ vm.runInNewContext(readFileSync(new URL('../../pwa-cloudflare/public/sw.js',import.meta.url),'utf8'),{self,URL});
+ let pending;
+ handlers.push({data:{json:()=>payload(events[0],{details:true})},waitUntil:p=>pending=p});await pending;
+ assert.equal(shown[0].data.url,'https://perfect.example/#perfect-order=OF1026-01');
+ const click=async url=>{handlers.notificationclick({notification:{close(){},data:{url}},waitUntil:p=>pending=p});await pending;};
+ await click(shown[0].data.url);assert.equal(opened[0],shown[0].data.url);
+ windows=[{url:'https://perfect.example/',postMessage:m=>messages.push(m),focus:async()=>{}}];
+ await click('/#perfect-day=2026-10-27');assert.equal(messages[0].url,'https://perfect.example/#perfect-day=2026-10-27');
+ await click('https://evil.example');assert.equal(messages[1].url,'https://perfect.example/');
+});
+test('daily profile is token scoped and includes only own assigned shifts and orders',()=>{
+ const s=fixture(),sh=s.sheets.find(x=>x.name===SHIFTS);
+ sh.rows.push(['2026-10-27|BOX1','2026-10-27','BOX1','admin',true,true,'v1','','admin',0]);
+ const r=createRuntime(s),own=r.call('perfectProfile54GetRoster',[token,{month:'2026-10',date:'2026-10-27',userId:'other'}]);
+ assert.equal(own.detail.shifts.length,1);assert.equal(own.detail.shifts[0].station,'BOX1');assert.equal(own.detail.orders.length,1);assert.equal(own.detail.orders[0].id,'OF1026-01');
+ const colleague=r.call('perfectProfile54GetRoster',[other,{month:'2026-10',date:'2026-10-27',userId:'admin'}]);
+ assert.equal(colleague.detail.shifts.length,0);assert.equal(colleague.detail.orders.length,0);
+ assert.throws(()=>r.call('perfectProfile54GetRoster',[token,{month:'2026-10',date:'2026-11-01'}]),/Neplatný den/);
+ assert.throws(()=>r.call('perfectProfile54GetRoster',['invalid',{month:'2026-10',date:'2026-10-27'}]));
+});
+test('notification destination waits for login and opens once',()=>{
+ const host=readFileSync(new URL('../../pwa-cloudflare/public/host.js',import.meta.url),'utf8');
+ const script=host.slice(host.indexOf('// A notification target survives login'));
+ const calls=[],gate={style:{display:''}},location={origin:'https://perfect.example',pathname:'/',search:'',hash:'#perfect-day=2026-10-27'},handlers={};let tick,loggedIn=false;
+ const window={PerfectStorage62:{session:{getItem:()=>loggedIn?'token':''}},perfectOwnDay114:d=>calls.push(['day',d]),perfectOpenMyProfile:()=>calls.push(['profile']),perfectOpenOrder114:id=>calls.push(['order',id]),perfectGo:p=>calls.push(['go',p])};
+ const ctx={window,location,URL,Event,document:{getElementById:()=>gate,querySelector:()=>({click(){}})},navigator:{serviceWorker:{addEventListener:(k,fn)=>handlers[k]=fn}},addEventListener(){},setInterval:fn=>tick=fn,history:{replaceState:()=>location.hash=''}};
+ vm.runInNewContext(script,ctx);tick();assert.equal(calls.length,0);
+ loggedIn=true;gate.style.display='none';tick();assert.equal(calls[1][1],'2026-10-27');tick();assert.equal(calls.length,2);
+ handlers.message({data:{type:'PERFECT_OPEN',url:'https://perfect.example/#perfect-order=OF1026-01'}});
+ assert.equal(calls.at(-1)[1],'OF1026-01');
+ handlers.message({data:{type:'PERFECT_OPEN',url:'https://evil.example/#perfect-order=OF1026-02'}});assert.equal(calls.at(-1)[1],'OF1026-01');
+});
