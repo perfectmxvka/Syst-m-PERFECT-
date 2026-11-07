@@ -15,6 +15,8 @@ export function closeShifts(state, date) {
   return c.perfect40Trusted_(() => {
     const rows = c.perfectBoxes29Rows_('shift', date, date);
     const closed = [];
+    const closingStations = new Set(['BOX1','BOX2'].filter(station => !state.properties[`PERFECT_AUTO_CLOSE_${date}|${station}`] && rows.some(r => r.STATION === station && r.ACTIVE && r.USER_ID)));
+    if (closingStations.size) c.databaseShift115Complete_(date, Array.from(closingStations));
     for (const station of ['BOX1', 'BOX2']) {
       const key = `${date}|${station}`, marker = `PERFECT_AUTO_CLOSE_${key}`;
       if (state.properties[marker]) continue;
