@@ -1,3 +1,4 @@
+import {scheduleShiftClosing} from './auto-close-shifts.mjs';
 import {runScoped} from './scoped-store.mjs';
 import {scopeLoader,propertyMethods,boxWrites,readScopes,tickMethods} from './scopes110.mjs';
 import {readBoxesDay} from './boxes-read.mjs';
@@ -21,6 +22,7 @@ async function execute(method,args){const started=performance.now();try{if(metho
  if(push.enabled&&result?.success!==false&&!result?.replayed&&['perfect102WeeklySave','perfect102AdvanceSave'].includes(method)&&result?.record){const rec=result.record;enqueue(state,[{userId:rec.userId,type:'earnings',title:method==='perfect102AdvanceSave'?'Změna zálohy':'Změna srážky za obědy',body:rec.month+' · '+(method==='perfect102AdvanceSave'?(rec.cancelled?'Storno ':'Záloha ')+(rec.amountCents/100)+' Kč':'Srážka '+((rec.weeks||[]).reduce((n,w)=>n+w.amountCents,0)/100)+' Kč'),url:'/#perfect-month='+rec.month,created:Date.now()}]);}
  for(const pending of runtime.pendingFiles)await assets.upload(pending.meta,pending.bytes);
  return result;}));observe(method,performance.now()-started,!value?.__error&&value?.success!==false);return value;}catch(e){observe(method,performance.now()-started,false);throw e;}}
+const stopShiftClosing = scheduleShiftClosing(store, serialized);
 let delivering106=false;
 async function deliver106(){if(!push.enabled||delivering106)return;delivering106=true;try{
  // An empty outbox must not queue a full workbook transaction every ten seconds.
@@ -71,4 +73,4 @@ const server=http.createServer(async(req,res)=>{res.perfectGzip=/\bgzip\b/.test(
 let mailBusy=false;async function mailTick(){if(mailBusy||!process.env.RESEND_API_KEY||!process.env.MAIL_FROM)return;mailBusy=true;try{const job=await serialized(()=>store.run(state=>{const r=createRuntime(state);return r.ctx.perfect40Trusted_(()=>r.ctx.perfect103NoShowClaim_());}));if(job){let result;try{result=await sendNoShow(job,{apiKey:process.env.RESEND_API_KEY,from:process.env.MAIL_FROM});}catch{result={ok:false,id:'Nejasná odpověď'};}await serialized(()=>store.run(state=>{const r=createRuntime(state);return r.ctx.perfect40Trusted_(()=>r.ctx.perfect103NoShowFinish_(job.key,result.ok,result.id));}));}}catch(e){console.error('No-show mail worker:',e.name);}finally{mailBusy=false;}}
 const mailTimer=setInterval(mailTick,60000);mailTimer.unref();
 server.listen(Number(process.env.PORT)||8080,'0.0.0.0',()=>console.log('PERFECT 1.06 host ready ('+backend+')'));
-process.on('SIGTERM',()=>server.close(async()=>{await queue;await client.close();process.exit(0);}));
+process.on('SIGTERM',()=>{stopShiftClosing();server.close(async()=>{await queue;await client.close();process.exit(0);});});
