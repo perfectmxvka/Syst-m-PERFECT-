@@ -7,8 +7,3 @@ Zachová se přiřazený zaměstnanec, bonusy a stávající výpočet odměny. 
 Po nasazení změny stačí běžící Node server (`mongo/server.mjs`); externí cron není potřeba. Host musí běžet i večer. Při výpadku se pokus opakuje každou minutu a při restartu ještě tentýž den po 20:15. Celodenní výpadek se automaticky nedoplňuje zpětně, aby se nepotvrzovaly historické směny bez kontroly.
 
 Ověření: `node mongo/test/auto-close-shifts.test.mjs`.
-
-
-## Oprava 115
-
-Čekající přiřazené zakázky se při uzavření boxu dokončí; zrušené a nedorazivší zakázky se nemění. Dokončování po plánovaném příjezdu a délce programu nově běží také přímo na serveru každou minutu. Po nasazení zpracuje i dosud čekající zakázky, jejichž platný termín již uplynul; budoucí, neznámé programy, duplicity a detailing ponechá k ruční kontrole podle existujících pravidel.

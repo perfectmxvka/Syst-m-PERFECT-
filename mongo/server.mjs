@@ -1,4 +1,3 @@
-import {scheduleOrderCompletion} from './auto-complete-orders.mjs';
 import {scheduleShiftClosing} from './auto-close-shifts.mjs';
 import {runScoped} from './scoped-store.mjs';
 import {scopeLoader,propertyMethods,boxWrites,readScopes,tickMethods} from './scopes110.mjs';
@@ -23,7 +22,6 @@ async function execute(method,args){const started=performance.now();try{if(metho
  if(push.enabled&&result?.success!==false&&!result?.replayed&&['perfect102WeeklySave','perfect102AdvanceSave'].includes(method)&&result?.record){const rec=result.record;enqueue(state,[{userId:rec.userId,type:'earnings',title:method==='perfect102AdvanceSave'?'Změna zálohy':'Změna srážky za obědy',body:rec.month+' · '+(method==='perfect102AdvanceSave'?(rec.cancelled?'Storno ':'Záloha ')+(rec.amountCents/100)+' Kč':'Srážka '+((rec.weeks||[]).reduce((n,w)=>n+w.amountCents,0)/100)+' Kč'),url:'/#perfect-month='+rec.month,created:Date.now()}]);}
  for(const pending of runtime.pendingFiles)await assets.upload(pending.meta,pending.bytes);
  return result;}));observe(method,performance.now()-started,!value?.__error&&value?.success!==false);return value;}catch(e){observe(method,performance.now()-started,false);throw e;}}
-const stopOrderCompletion = scheduleOrderCompletion(store, serialized);
 const stopShiftClosing = scheduleShiftClosing(store, serialized);
 let delivering106=false;
 async function deliver106(){if(!push.enabled||delivering106)return;delivering106=true;try{
@@ -43,7 +41,7 @@ const rates=new Map();function rate(ip,limit=120){const now=Date.now();let r=rat
 const send=(res,status,value)=>{const body=Buffer.from(JSON.stringify(value)),zip=res.perfectGzip&&body.length>2048;res.writeHead(status,{'content-type':'application/json; charset=utf-8',...(zip?{'content-encoding':'gzip','vary':'Accept-Encoding'}:{})});res.end(zip?gzipSync(body):body);};
 const htmlGzip=gzipSync(html);
 const server=http.createServer(async(req,res)=>{res.perfectGzip=/\bgzip\b/.test(req.headers['accept-encoding']||'');res.setHeader('cache-control','no-store');res.setHeader('x-content-type-options','nosniff');res.setHeader('x-frame-options','DENY');res.setHeader('referrer-policy','same-origin');res.setHeader('x-robots-tag','noindex, nofollow');const pathname=new URL(req.url,origin).pathname;try{
- if(req.method==='GET'&&pathname==='/healthz')return send(res,200,{ok:true,build:'PERFECT-2026-11-07-115'});
+ if(req.method==='GET'&&pathname==='/healthz')return send(res,200,{ok:true,build:'PERFECT-SUPABASE-2026-11-04-114'});
  if(req.method==='GET'&&pathname==='/push-config')return send(res,200,{enabled:push.enabled,publicKey:push.publicKey,reason:push.reason});
  if(req.method==='GET'&&(pathname==='/'||pathname==='/index.html')){res.setHeader('content-type','text/html; charset=utf-8');if(res.perfectGzip){res.setHeader('content-encoding','gzip');res.setHeader('vary','Accept-Encoding');}return res.end(res.perfectGzip?htmlGzip:html);}
  if(req.method==='GET'&&publicFiles.has(pathname)){const ext=path.extname(pathname);res.writeHead(200,{'content-type':{'.js':'text/javascript','.mjs':'text/javascript','.wasm':'application/wasm','.gz':'application/octet-stream','.txt':'text/plain','.png':'image/png','.ico':'image/x-icon','.webmanifest':'application/manifest+json'}[ext]});return fs.createReadStream(publicFiles.get(pathname)).pipe(res);}
@@ -75,4 +73,4 @@ const server=http.createServer(async(req,res)=>{res.perfectGzip=/\bgzip\b/.test(
 let mailBusy=false;async function mailTick(){if(mailBusy||!process.env.RESEND_API_KEY||!process.env.MAIL_FROM)return;mailBusy=true;try{const job=await serialized(()=>store.run(state=>{const r=createRuntime(state);return r.ctx.perfect40Trusted_(()=>r.ctx.perfect103NoShowClaim_());}));if(job){let result;try{result=await sendNoShow(job,{apiKey:process.env.RESEND_API_KEY,from:process.env.MAIL_FROM});}catch{result={ok:false,id:'Nejasná odpověď'};}await serialized(()=>store.run(state=>{const r=createRuntime(state);return r.ctx.perfect40Trusted_(()=>r.ctx.perfect103NoShowFinish_(job.key,result.ok,result.id));}));}}catch(e){console.error('No-show mail worker:',e.name);}finally{mailBusy=false;}}
 const mailTimer=setInterval(mailTick,60000);mailTimer.unref();
 server.listen(Number(process.env.PORT)||8080,'0.0.0.0',()=>console.log('PERFECT 1.06 host ready ('+backend+')'));
-process.on('SIGTERM',()=>{stopShiftClosing();stopOrderCompletion();server.close(async()=>{await queue;await client.close();process.exit(0);});});
+process.on('SIGTERM',()=>{stopShiftClosing();server.close(async()=>{await queue;await client.close();process.exit(0);});});
